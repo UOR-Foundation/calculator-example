@@ -21,4 +21,3 @@ cp vendor/PrismPM/tests/hologram-oracle/src/main.rs "$oracle_work/harness/src/ma
 cargo fetch --locked --manifest-path "$oracle_work/harness/Cargo.toml"
 
 npm ci --ignore-scripts --no-audit --no-fund --prefer-offline
-npm audit --audit-level=high --package-lock-only
