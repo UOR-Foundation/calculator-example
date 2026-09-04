@@ -1,0 +1,19 @@
+[package]
+name = "calculator-example"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.97"
+publish = false
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/UOR-Foundation/calculator-example"
+homepage = "https://uor-foundation.github.io/calculator-example/"
+
+[dependencies]
+prism-calculator = { version = "=0.1.0", default-features = false, features = ["std"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = "deny"
+pedantic = "deny"

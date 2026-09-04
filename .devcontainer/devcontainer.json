@@ -1,0 +1,34 @@
+{
+  "name": "Calculator reference application",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "remoteUser": "vscode",
+  "postCreateCommand": "./scripts/fetch.sh && node --version && npm --version && lean --version",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "leanprover.lean4"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "[rust]": {
+          "editor.defaultFormatter": "rust-lang.rust-analyzer"
+        },
+        "rust-analyzer.check.command": "clippy",
+        "rust-analyzer.procMacro.enable": true,
+        "search.exclude": {
+          "**/target": true,
+          "**/.prism": true,
+          "**/.lexlean": true
+        }
+      }
+    }
+  },
+  "remoteEnv": {
+    "PATH": "/usr/local/elan/bin:/home/vscode/.cargo/bin:${containerEnv:PATH}",
+    "PLAYWRIGHT_BROWSERS_PATH": "/ms-playwright"
+  }
+}

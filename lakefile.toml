@@ -1,0 +1,6 @@
+name = "PrismCalculator"
+version = "0.1.0"
+defaultTargets = ["PrismCalculator"]
+
+[[lean_lib]]
+name = "PrismCalculator"

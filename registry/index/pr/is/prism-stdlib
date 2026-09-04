@@ -1,0 +1,1 @@
+{"name":"prism-stdlib","vers":"0.1.0","deps":[],"cksum":"96e41ec1793d75db04ef12224d685a67ee8451d5a034e3bcb7a51ebc1ea91f4d","features":{"default":["std"],"std":[]},"yanked":false}

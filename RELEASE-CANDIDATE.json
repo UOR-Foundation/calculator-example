@@ -1,0 +1,52 @@
+{
+  "application": "Calculator",
+  "application_acceptance": {
+    "artifact_sha256": "b5f0a20779ecfd7e2e1b2eb9a8472f2155e3b8fe9bf5524ce651d0f20fbe7715",
+    "status": "verified",
+    "verification_manifest_sha256": "07d48406772000cce194d0e0f85c02517d927d334cd25ef54b3b8b446a67ad56"
+  },
+  "build_id": "d4c3d205158897a185ab64976c17affaa28bc8811e04cd133289af78be7ca214",
+  "dependencies": {
+    "hologram_live_commit": "d8208266d8abdc2445b7bbc0cef412a566adfaf1",
+    "lean4_prod_commit": "c4078cf96537cd71c0818bbed0aa82300ef66786",
+    "lexlean_commit": "0b53334e5846a1f5e5d9bb3bf6959c085daa4d08",
+    "prismpm_commit": "77774235c2c02b9fc2ce848e93d5c63c31b393d9",
+    "uor_hologram_commit": "2bda6a9a9476872dade705bd61ece4209607f6da"
+  },
+  "holo": {
+    "application_kappa": "blake3:4ed201e5a4b5f463686bcbc8d70c1512632183d54cc417778a71e9ef00a40583",
+    "archive_fingerprint": "8408e0895572fab09e783f7aadb129dc4cb96d0b62850a16f3ddbe44ed6021ba",
+    "archive_kappa": "blake3:4efe02106778d44a469cc0fc8f6998167af7c9075a3ac605c150098c0f5243bb",
+    "guest_content_kappa": "blake3:2adca3e7ca42d7415a5227a20002baad90047d087249cbb9ea36e557f5a4a380",
+    "model_content_kappa": "blake3:e76544838a98c46341ed8807f72897ec68de5a8a9bf28721738a76761c9df90e",
+    "sha256": "84371aaac82af6b2a81a25a81d43d4097892985f55ae4919cfdcfa8b6e3486e7",
+    "view_content_kappa": "blake3:9860e7054e3f3a8e6ab79c26bcda06bc65778ebdda211160ea66871142b7c808"
+  },
+  "model": {
+    "generated_core_sha256": "ae6c37001a43698ab8b56ec4685d66a783b78e83395b93404681f8ba157420b5",
+    "model_id": "074921890f5c372c89f4ed794d26dd550231d5e9bf99bf9474cc1a78923292c6",
+    "source_id": "63611de07b58d03b3a9976b34138d903215e50c53ec2ba4ee3cdeb452b0710ad",
+    "source_root_sha256": "d58c4f73e88228f0580e75d464cbf11f8d32ef9ef709271fa4fb2a074ef680fc",
+    "view_model_id": "706ed92a8dbf79bd1eafe6a6cf8b980e99f089b69af373a90de1955f78d7bd1b"
+  },
+  "packages": [
+    {
+      "name": "prism-stdlib",
+      "publication": "local-registry-release-candidate",
+      "sha256": "96e41ec1793d75db04ef12224d685a67ee8451d5a034e3bcb7a51ebc1ea91f4d",
+      "version": "0.1.0"
+    },
+    {
+      "name": "prism-calculator",
+      "publication": "local-registry-release-candidate",
+      "sha256": "bd30defc579454a161692a038dc63039a235777b5ac9ae027d3319630aca1d7b",
+      "version": "0.1.0"
+    }
+  ],
+  "pages": {
+    "deployment": "github-pages-environment-after-main-acceptance",
+    "production_manifest_sha256": "29150c8ba72feaddb20c30c02ea76ce4df9baba8eed19965ea37218960b8b1b5",
+    "url": "https://uor-foundation.github.io/calculator-example/"
+  },
+  "schema": "calculator-example/release-candidate/1"
+}

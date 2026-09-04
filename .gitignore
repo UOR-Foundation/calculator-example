@@ -1,0 +1,8 @@
+/.cargo-home/
+/.lexlean/
+/.prism/
+/node_modules/
+/playwright-report/
+/target/
+/test-results/
+/.DS_Store

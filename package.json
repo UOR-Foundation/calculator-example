@@ -1,0 +1,15 @@
+{
+  "name": "calculator-example-acceptance",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:live": "BASE_URL=https://uor-foundation.github.io/calculator-example/ playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.62.1",
+    "http-server": "14.1.1"
+  }
+}
