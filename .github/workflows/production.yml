@@ -1,0 +1,475 @@
+name: Build once and accept Calculator production releases
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions: {}
+
+concurrency:
+  group: calculator-production-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      release-a: ${{ steps.a.outputs.release-digest }}
+      release-b: ${{ steps.b.outputs.release-digest }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          submodules: false
+      - name: Require the sealed Calculator regression baseline
+        run: |
+          set -eu
+          docker run --rm --user "$(id -u):$(id -g)" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --env HOME=/tmp/prismpm-home \
+            --env PRISMPM_EPHEMERAL_HOME=1 \
+            --tmpfs /tmp:rw,exec,nosuid,size=1g \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE:ro" \
+            --workdir "$GITHUB_WORKSPACE" \
+            __PRISMPM_SDK_IMAGE__ node scripts/verify-baseline.mjs --require-sealed
+      - name: Fetch immutable model inputs through the locked SDK
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: fetch
+          context: .
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - id: a
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: build
+          context: .
+          reference: ghcr.io/uor-foundation/calculator-system:${{ github.ref_name }}-a
+          release: A
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - id: b
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: build
+          context: .
+          reference: ghcr.io/uor-foundation/calculator-system:${{ github.ref_name }}-b
+          release: B
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - name: Transfer the exact built graphs without publishing
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: calculator-built-store
+          path: .prism
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  publish-candidate:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    environment: production-build
+    steps:
+      - name: Reject publication from an unprotected ref
+        env:
+          REF_PROTECTED: ${{ github.ref_protected }}
+        run: test "$REF_PROTECTED" = true
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          submodules: false
+      - uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: calculator-built-store
+          path: .prism
+      - id: policy-a
+        name: Derive SDK-owned release-A promotion policy
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: prepare-promotion
+          context: .
+          environment: production-build
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - id: policy-b
+        name: Derive SDK-owned release-B promotion policy
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: prepare-promotion
+          context: .
+          environment: production-build
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - name: Sign and immediately verify release A
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: sign
+          context: .
+          policy: ${{ steps.policy-a.outputs.policy-path }}
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+          trusted-root: ${{ steps.policy-a.outputs.trusted-root-path }}
+      - name: Sign and immediately verify release B
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: sign
+          context: .
+          policy: ${{ steps.policy-b.outputs.policy-path }}
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+          trusted-root: ${{ steps.policy-b.outputs.trusted-root-path }}
+      - name: Promote release A to candidate
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: promote
+          context: .
+          policy: ${{ steps.policy-a.outputs.policy-path }}
+          promotion-to: candidate
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+          trusted-root: ${{ steps.policy-a.outputs.trusted-root-path }}
+      - name: Promote release B to candidate
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: promote
+          context: .
+          policy: ${{ steps.policy-b.outputs.policy-path }}
+          promotion-to: candidate
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+          trusted-root: ${{ steps.policy-b.outputs.trusted-root-path }}
+      - name: Push signed candidate A without rebuilding
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: push
+          context: .
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - name: Push signed candidate B without rebuilding
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: push
+          context: .
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+
+  accept:
+    needs: [build, publish-candidate]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+    environment: production-acceptance
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          submodules: false
+      - uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull release A into the clean acceptance cache
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: pull
+          context: .
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - id: candidate-trust-a
+        name: Explicitly replay release-A trust after the clean pull
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: verify-release
+          context: .
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - name: Pull release B into the clean acceptance cache
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: pull
+          context: .
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - id: candidate-trust-b
+        name: Explicitly replay release-B trust after the clean pull
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: verify-release
+          context: .
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - name: Require both clean-pulled candidate signature closures
+        env:
+          TRUST_A: ${{ steps.candidate-trust-a.outputs.result }}
+          TRUST_B: ${{ steps.candidate-trust-b.outputs.result }}
+        run: |
+          set -eu
+          docker run --rm --interactive --network none --cap-drop ALL \
+            --security-opt no-new-privileges \
+            --env TRUST_A --env TRUST_B \
+            --entrypoint node __PRISMPM_SDK_IMAGE__ - <<'NODE'
+          for (const [name, input] of [['A', process.env.TRUST_A], ['B', process.env.TRUST_B]]) {
+            const result = JSON.parse(input);
+            if (result.schema !== 'prismpm/signature-closure-result/1' ||
+                result.verified !== true || result.status !== 'candidate' ||
+                result.release_signatures !== 1 || result.promotion_signatures !== 1 ||
+                result.deployment_evidence_signatures !== 0) {
+              throw new Error(`release ${name} candidate signature closure was not independently verified`);
+            }
+          }
+          NODE
+      - name: Accept the pushed immutable graphs without rebuilding
+        env:
+          CALCULATOR_RELEASE_A: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
+          CALCULATOR_RELEASE_B: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}
+        run: |
+          set -eu
+          socket_group=$(stat -c '%g' /var/run/docker.sock)
+          docker_config=$(mktemp -d)
+          trap 'rm -rf "$docker_config"' EXIT
+          cp "$HOME/.docker/config.json" "$docker_config/config.json"
+          docker run --rm --user "$(id -u):$(id -g)" \
+            --group-add "$socket_group" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --env DOCKER_CONFIG=/tmp/prismpm-docker \
+            --env HOME=/tmp/prismpm-home \
+            --env PRISMPM_EPHEMERAL_HOME=1 \
+            --env CALCULATOR_RELEASE_A --env CALCULATOR_RELEASE_B \
+            --tmpfs /tmp:rw,exec,nosuid,size=4g \
+            --volume /var/run/docker.sock:/var/run/docker.sock \
+            --volume "$docker_config:/tmp/prismpm-docker:ro" \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+            --workdir "$GITHUB_WORKSPACE" \
+            __PRISMPM_SDK_IMAGE__ bash -eu -o pipefail -c 'just setup && just accept-system'
+      - name: Transfer the accepted local graphs and evidence without publishing
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: calculator-accepted-store
+          path: .prism
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  promote-accepted:
+    needs: [build, accept]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    environment: production-build
+    steps:
+      - name: Reject accepted promotion from an unprotected ref
+        env:
+          REF_PROTECTED: ${{ github.ref_protected }}
+        run: test "$REF_PROTECTED" = true
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          submodules: false
+      - uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: calculator-accepted-store
+          path: .prism
+      - id: policy-a
+        name: Re-derive the exact release-A policy from provenance and protected identity
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: prepare-promotion
+          context: .
+          environment: production-build
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - id: policy-b
+        name: Re-derive the exact release-B policy from provenance and protected identity
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: prepare-promotion
+          context: .
+          environment: production-build
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - name: Sign and verify the complete release-A deployment-evidence closure
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: sign-evidence
+          context: .
+          policy: ${{ steps.policy-a.outputs.policy-path }}
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+          trusted-root: ${{ steps.policy-a.outputs.trusted-root-path }}
+      - name: Sign and verify the complete release-B deployment-evidence closure
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: sign-evidence
+          context: .
+          policy: ${{ steps.policy-b.outputs.policy-path }}
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+          trusted-root: ${{ steps.policy-b.outputs.trusted-root-path }}
+      - name: Promote accepted release A without rebuilding
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: promote
+          context: .
+          policy: ${{ steps.policy-a.outputs.policy-path }}
+          promotion-to: accepted
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+          trusted-root: ${{ steps.policy-a.outputs.trusted-root-path }}
+      - name: Promote accepted release B without rebuilding
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: promote
+          context: .
+          policy: ${{ steps.policy-b.outputs.policy-path }}
+          promotion-to: accepted
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+          trusted-root: ${{ steps.policy-b.outputs.trusted-root-path }}
+      - name: Push accepted release A and its evidence without rebuilding
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: push
+          context: .
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - name: Push accepted release B and its evidence without rebuilding
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: push
+          context: .
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+
+  verify-published:
+    needs: [build, promote-accepted]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          submodules: false
+      - uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull accepted release A into another clean cache
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: pull
+          context: .
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - id: verify-release-a
+        name: Independently replay every release-A signature and promotion decision
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: verify-release
+          context: .
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - id: inspect-a
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: inspect
+          context: .
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - name: Pull accepted release B into another clean cache
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: pull
+          context: .
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - id: verify-release-b
+        name: Independently replay every release-B signature and promotion decision
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: verify-release
+          context: .
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - id: inspect-b
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: inspect
+          context: .
+          reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - name: Require each remotely reconstructed graph and signature closure to be accepted
+        env:
+          INSPECT_A: ${{ steps.inspect-a.outputs.result }}
+          INSPECT_B: ${{ steps.inspect-b.outputs.result }}
+          TRUST_A: ${{ steps.verify-release-a.outputs.result }}
+          TRUST_B: ${{ steps.verify-release-b.outputs.result }}
+        run: |
+          set -eu
+          docker run --rm --interactive --network none --cap-drop ALL \
+            --security-opt no-new-privileges \
+            --env INSPECT_A --env INSPECT_B --env TRUST_A --env TRUST_B \
+            --entrypoint node __PRISMPM_SDK_IMAGE__ - <<'NODE'
+          const promotion = 'application/vnd.prismpm.promotion.v1+json';
+          const evidence = 'application/vnd.prismpm.deployment.evidence.v1+json';
+          const evidenceSignature = 'application/vnd.prismpm.evidence.signature.v1+json';
+          for (const [name, input] of [['A', process.env.INSPECT_A], ['B', process.env.INSPECT_B]]) {
+            const result = JSON.parse(input);
+            const transitions = result.referrers.filter((row) => row.artifactType === promotion);
+            if (transitions.length !== 2) {
+              throw new Error(`release ${name} does not have the validated candidate-to-accepted chain`);
+            }
+            const deploymentEvidence = result.referrers.filter((row) => row.artifactType === evidence);
+            const signedClosures = result.referrers.filter((row) => row.artifactType === evidenceSignature);
+            if (deploymentEvidence.length === 0 || signedClosures.length !== 1) {
+              throw new Error(`release ${name} does not have one verified signature over its nonempty deployment-evidence closure`);
+            }
+          }
+          for (const [name, input] of [['A', process.env.TRUST_A], ['B', process.env.TRUST_B]]) {
+            const result = JSON.parse(input);
+            if (result.schema !== 'prismpm/signature-closure-result/1' ||
+                result.verified !== true || result.status !== 'accepted' ||
+                result.release_signatures !== 1 || result.promotion_signatures !== 2 ||
+                result.deployment_evidence_signatures !== 1) {
+              throw new Error(`release ${name} signature closure was not independently verified`);
+            }
+          }
+          NODE
+
+  publish-pages:
+    needs: [build, verify-published]
+    permissions:
+      contents: read
+      id-token: write
+      packages: read
+      pages: write
+    uses: ./.github/workflows/pages.yml
+    with:
+      baseline-bootstrap: false
+      release-reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}

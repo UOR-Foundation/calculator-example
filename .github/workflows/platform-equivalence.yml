@@ -1,0 +1,191 @@
+name: Calculator cross-platform equivalence
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-platform:
+    name: build ${{ matrix.release }} / ${{ matrix.architecture }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - architecture: amd64
+            release: A
+            runner: ubuntu-24.04
+          - architecture: arm64
+            release: A
+            runner: ubuntu-24.04-arm
+          - architecture: amd64
+            release: B
+            runner: ubuntu-24.04
+          - architecture: arm64
+            release: B
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    steps:
+      - name: Check out the exact event revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          submodules: false
+      - name: Fetch immutable model inputs
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: fetch
+          context: .
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - id: build
+        name: Build the platform input without publication
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: build
+          context: .
+          reference: example.invalid/uor/calculator-system:${{ matrix.release }}-${{ matrix.architecture }}
+          release: ${{ matrix.release }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - name: Stage the complete generated and OCI closure
+        env:
+          ARCHITECTURE: ${{ matrix.architecture }}
+          BUILD_RESULT: ${{ steps.build.outputs.result }}
+          RELEASE: ${{ matrix.release }}
+          SDK_IMAGE: __PRISMPM_SDK_IMAGE__
+        run: |
+          set -euo pipefail
+          docker run --rm --interactive --user "$(id -u):$(id -g)" \
+            --network none --cap-drop ALL --security-opt no-new-privileges \
+            --env ARCHITECTURE --env BUILD_RESULT --env RELEASE --env SDK_IMAGE \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+            --workdir "$GITHUB_WORKSPACE" \
+            --entrypoint node "$SDK_IMAGE" - <<'NODE'
+          const fs = require('node:fs');
+          const result = JSON.parse(process.env.BUILD_RESULT);
+          if (!/^[0-9a-f]{64}$/.test(result.build_id ?? '') ||
+              !/^sha256:[0-9a-f]{64}$/.test(result.release_digest ?? '')) {
+            throw new Error('platform build did not return exact build/release identities');
+          }
+          const expectedSdk = process.env.SDK_IMAGE.slice(process.env.SDK_IMAGE.indexOf('@') + 1);
+          const record = {
+            architecture: process.env.ARCHITECTURE,
+            build_id: result.build_id,
+            release: process.env.RELEASE,
+            release_digest: result.release_digest,
+            result,
+            schema: 'calculator/platform-build-input/1',
+            sdk_digest: expectedSdk,
+          };
+          fs.mkdirSync('.prism/platform-input', {recursive: true});
+          fs.writeFileSync('.prism/platform-input/result.json', JSON.stringify(record));
+          fs.writeFileSync('.prism/platform-input/build-id', result.build_id);
+          NODE
+          build_id=$(cat .prism/platform-input/build-id)
+          mkdir -p .prism/platform-root/build .prism/platform-root/oci
+          cp -a ".prism/build/$build_id/." .prism/platform-root/build/
+          cp -a .prism/oci/. .prism/platform-root/oci/
+          test -f .prism/platform-root/build/system.prism.json
+          test -f .prism/platform-root/oci/index.json
+      - name: Upload the complete architecture closure
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: calculator-root-${{ matrix.release }}-${{ matrix.architecture }}
+          path: .prism/platform-root
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+      - name: Upload the canonical build-result binding
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: calculator-result-${{ matrix.release }}-${{ matrix.architecture }}
+          path: .prism/platform-input/result.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  compare:
+    name: SDK-owned platform comparison
+    needs: build-platform
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out the exact event revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          submodules: false
+      - name: Download all architecture roots
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: calculator-root-*
+          path: .prism/platform-roots
+      - name: Download all canonical result bindings
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: calculator-result-*
+          path: .prism/platform-results
+      - name: Compare A and B with the SDK-owned classifier
+        env:
+          SDK_IMAGE: __PRISMPM_SDK_IMAGE__
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/platform-equivalence
+          socket_group=$(stat -c '%g' /var/run/docker.sock)
+          docker run --rm --user "$(id -u):$(id -g)" \
+            --group-add "$socket_group" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --env HOME=/tmp/prismpm-home \
+            --env PRISMPM_EPHEMERAL_HOME=1 \
+            --env SDK_IMAGE \
+            --tmpfs /tmp:rw,exec,nosuid,size=1g \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+            --workdir "$GITHUB_WORKSPACE" \
+            "$SDK_IMAGE" bash -eu -o pipefail -c '
+              for release in A B; do
+                left=.prism/platform-roots/calculator-root-$release-amd64
+                right=.prism/platform-roots/calculator-root-$release-arm64
+                left_result=.prism/platform-results/calculator-result-$release-amd64/result.json
+                right_result=.prism/platform-results/calculator-result-$release-arm64/result.json
+                readarray -t identities < <(node - "$left_result" "$right_result" "$release" "$SDK_IMAGE" <<"NODE"
+          const fs = require("node:fs");
+          const [leftPath, rightPath, release, image] = process.argv.slice(2);
+          const left = JSON.parse(fs.readFileSync(leftPath, "utf8"));
+          const right = JSON.parse(fs.readFileSync(rightPath, "utf8"));
+          const sdk = image.slice(image.indexOf("@") + 1);
+          for (const [value, architecture] of [[left, "amd64"], [right, "arm64"]]) {
+            if (value.schema !== "calculator/platform-build-input/1" ||
+                value.architecture !== architecture || value.release !== release ||
+                value.sdk_digest !== sdk) throw new Error("platform build binding changed");
+          }
+          if (left.release_digest !== right.release_digest) {
+            throw new Error("architecture builds produced different product-release digests");
+          }
+          process.stdout.write(`${left.release_digest}\n${sdk}\n`);
+          NODE
+                )
+                test "${#identities[@]}" -eq 2
+                prismpm-platform-equivalence \
+                  --left-root "$left" \
+                  --right-root "$right" \
+                  --left-architecture amd64 \
+                  --right-architecture arm64 \
+                  --release-digest "${identities[0]}" \
+                  --sdk-digest "${identities[1]}" \
+                  --system-model "$left/build/system.prism.json" \
+                  >"artifacts/platform-equivalence/release-$release.json"
+              done
+            '
+      - name: Upload canonical platform-equivalence reports
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: calculator-platform-equivalence
+          path: artifacts/platform-equivalence
+          if-no-files-found: error
+          retention-days: 30

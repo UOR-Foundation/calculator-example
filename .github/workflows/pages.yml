@@ -1,44 +1,190 @@
-name: Verify and deploy Calculator
+name: Publish modeled Calculator Pages
 
 on:
+  workflow_call:
+    inputs:
+      baseline-bootstrap:
+        description: Use the one-time pre-seal corrected-projection path.
+        required: false
+        default: false
+        type: boolean
+      release-reference:
+        description: Exact accepted Calculator release containing the Pages closure.
+        required: true
+        type: string
   push:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      baseline-bootstrap:
+        description: Publish and verify the corrected projection before its first baseline seal.
+        required: false
+        default: false
+        type: boolean
+      release-reference:
+        description: Exact accepted Calculator release for an ordinary publication.
+        required: false
+        default: ''
+        type: string
 
 concurrency:
   group: pages-${{ github.ref }}
   cancel-in-progress: false
 
+permissions: {}
+
 jobs:
-  verify:
-    runs-on: ubuntu-latest
+  build-pages:
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
+      packages: read
       pages: read
     steps:
-      - name: Check out exact source closure
+      - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          submodules: recursive
-      - name: Verify in the pinned devcontainer
-        uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca
+          fetch-depth: 0
+          persist-credentials: false
+          submodules: false
+      - name: Require the correct Calculator baseline phase
+        env:
+          BASELINE_BOOTSTRAP: ${{ inputs.baseline-bootstrap || false }}
+          REF_PROTECTED: ${{ github.ref_protected }}
+        run: |
+          set -eu
+          baseline_argument=--require-sealed
+          if test "$BASELINE_BOOTSTRAP" = true; then
+            test "$GITHUB_EVENT_NAME" = workflow_dispatch
+            test "$GITHUB_REF" = refs/heads/main
+            test "$REF_PROTECTED" = true
+            baseline_argument=--require-projection-bootstrap
+          fi
+          docker run --rm --user "$(id -u):$(id -g)" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --env HOME=/tmp/prismpm-home \
+            --env PRISMPM_EPHEMERAL_HOME=1 \
+            --tmpfs /tmp:rw,exec,nosuid,size=1g \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE:ro" \
+            --workdir "$GITHUB_WORKSPACE" \
+            __PRISMPM_SDK_IMAGE__ node scripts/verify-baseline.mjs "$baseline_argument"
+      - name: Fetch immutable model inputs through the locked SDK
+        if: inputs.release-reference == ''
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
         with:
-          push: never
-          runCmd: just vv
+          command: fetch
+          context: .
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - name: Verify with the locked SDK
+        if: inputs.release-reference == ''
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: verify
+          context: .
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - name: Require an exact Calculator release identity
+        if: inputs.release-reference != ''
+        env:
+          REF_PROTECTED: ${{ github.ref_protected }}
+          RELEASE_REFERENCE: ${{ inputs.release-reference }}
+        run: |
+          test "$REF_PROTECTED" = true
+          [[ "$RELEASE_REFERENCE" =~ ^ghcr\.io/uor-foundation/calculator-system@sha256:[0-9a-f]{64}$ ]]
+      - name: Authenticate the clean accepted-release pull
+        if: inputs.release-reference != ''
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Pull the accepted release into a clean local cache
+        if: inputs.release-reference != ''
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: pull
+          context: .
+          reference: ${{ inputs.release-reference }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - id: pages-release-trust
+        name: Explicitly replay accepted release trust after the clean pull
+        if: inputs.release-reference != ''
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: verify-release
+          context: .
+          reference: ${{ inputs.release-reference }}
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - name: Bind committed Pages bytes to the accepted release graph
+        if: inputs.release-reference != ''
+        env:
+          RELEASE_REFERENCE: ${{ inputs.release-reference }}
+          TRUST_RESULT: ${{ steps.pages-release-trust.outputs.result }}
+        run: |
+          set -eu
+          docker run --rm --interactive --network none --cap-drop ALL \
+            --security-opt no-new-privileges \
+            --env RELEASE_REFERENCE --env TRUST_RESULT \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+            --workdir "$GITHUB_WORKSPACE" \
+            --entrypoint bash __PRISMPM_SDK_IMAGE__ -eu -o pipefail -c '
+              node - <<"NODE"
+          const result = JSON.parse(process.env.TRUST_RESULT);
+          if (result.schema !== "prismpm/signature-closure-result/1" ||
+              result.verified !== true || result.status !== "accepted" ||
+              result.release_signatures !== 1 || result.promotion_signatures !== 2 ||
+              result.deployment_evidence_signatures !== 1) {
+            throw new Error("Pages release does not have the complete accepted signature closure");
+          }
+          NODE
+              temporary=$(mktemp -d)
+              trap '\''rm -rf "$temporary"'\'' EXIT
+              node scripts/extract-release-artifact.mjs "$RELEASE_REFERENCE" \
+                system.prism.json "$temporary/system.prism.json" >/dev/null
+              node - "$temporary/system.prism.json" <<"NODE"
+          const fs = require("node:fs");
+          const system = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+          if (system.schema !== "prismpm/system-model/1" ||
+              system.product?.id !== "calculator-system" ||
+              system.product?.version !== "B" ||
+              !/^sha256:[0-9a-f]{64}$/.test(
+                system.application_profile?.application_model_digest ?? "")) {
+            throw new Error("Pages release is not CalculatorSystem release B");
+          }
+          NODE
+              for name in app.css app.js index.html prism_calculator.js prism_calculator_bg.wasm provenance.json; do
+                node scripts/extract-release-artifact.mjs "$RELEASE_REFERENCE" \
+                  "view/browser/$name" "$temporary/$name" >/dev/null
+                cmp "$temporary/$name" "public/$name"
+              done
+            '
+      - name: Require the committed projection to equal the locked generator output
+        if: inputs.release-reference == ''
+        run: |
+          set -eu
+          socket_group=$(stat -c '%g' /var/run/docker.sock)
+          docker run --rm --user "$(id -u):$(id -g)" \
+            --group-add "$socket_group" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --env HOME=/tmp/prismpm-home \
+            --env PRISMPM_EPHEMERAL_HOME=1 \
+            --tmpfs /tmp:rw,exec,nosuid,size=1g \
+            --volume /var/run/docker.sock:/var/run/docker.sock \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+            --workdir "$GITHUB_WORKSPACE" \
+            __PRISMPM_SDK_IMAGE__ bash -eu -o pipefail -c \
+            'just setup && just verify-application-projection'
       - name: Configure GitHub Pages
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d
       - name: Upload the attested production closure
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9
         with:
           path: public
 
   deploy:
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    needs: verify
-    runs-on: ubuntu-latest
+    if: (inputs.release-reference != '' && github.ref_protected) || (inputs.baseline-bootstrap && github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.ref_protected)
+    needs: build-pages
+    runs-on: ubuntu-24.04
     permissions:
       pages: write
       id-token: write
@@ -49,3 +195,39 @@ jobs:
       - name: Deploy the verified artifact without rebuilding
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346
+
+  verify-live:
+    needs: deploy
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          submodules: false
+      - name: Prove live HTTPS bytes and browser behavior
+        env:
+          BASELINE_BOOTSTRAP: ${{ inputs.baseline-bootstrap || false }}
+        run: |
+          set -eu
+          socket_group=$(stat -c '%g' /var/run/docker.sock)
+          acceptance_argument=
+          if test "$BASELINE_BOOTSTRAP" = true; then
+            test "$GITHUB_EVENT_NAME" = workflow_dispatch
+            acceptance_argument=--projection-bootstrap
+          fi
+          docker run --rm --user "$(id -u):$(id -g)" \
+            --group-add "$socket_group" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --env HOME=/tmp/prismpm-home \
+            --env PRISMPM_EPHEMERAL_HOME=1 \
+            --env CALCULATOR_PAGES_COMMIT="$GITHUB_SHA" \
+            --tmpfs /tmp:rw,exec,nosuid,size=1g \
+            --volume /var/run/docker.sock:/var/run/docker.sock \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+            --workdir "$GITHUB_WORKSPACE" \
+            __PRISMPM_SDK_IMAGE__ bash -eu -o pipefail -c \
+            'just setup && ./scripts/acceptance.sh pages "$1"' calculator-pages "$acceptance_argument"

@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "playwright test",
-    "test:live": "BASE_URL=https://uor-foundation.github.io/calculator-example/ playwright test"
+    "test": "node scripts/verify-baseline.mjs --require-sealed && playwright test",
+    "test:live": "node scripts/verify-baseline.mjs --require-sealed --live && BASE_URL=https://uor-foundation.github.io/calculator-example/ playwright test"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

@@ -1,192 +1,121 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname "$0")/lib.sh"
+mode=${1:-}
+case "$mode" in
+  '') require_sdk ;;
+  --baseline-input)
+    require_sdk_environment
+    node scripts/verify-baseline.mjs --require-input-ready >/dev/null
+    git diff --quiet
+    git diff --cached --quiet
+    test -z "$(git ls-files --others --exclude-standard)" ||
+      die 'baseline input requires a clean committed source closure'
+    rm -rf .prism/repository-evidence
+    ;;
+  *) die 'usage: scripts/verify.sh [--baseline-input]' ;;
+esac
 
-root=$(cd "$(dirname "$0")/.." && pwd)
-cd "$root"
-
-expected_prismpm=$(tr -d '\n' < .prismpm-version)
-observed_prismpm=$(git -C vendor/PrismPM rev-parse HEAD)
-test "$observed_prismpm" = "$expected_prismpm"
-test "$(git -C vendor/PrismPM status --porcelain)" = ""
-
-authoritative=vendor/PrismPM/examples/Calculator
-for path in \
-  lake-manifest.json \
-  lakefile.toml \
-  lean-toolchain \
-  lexlean.lock \
-  lexlean.toml \
-  prismpm.toml \
-  src/Calculator.lex.tex
-do
-  cmp "$path" "$authoritative/$path"
+for forbidden in .gitmodules .prismpm-version vendor/PrismPM .cargo/config.toml registry; do
+  test ! -e "$forbidden" || die "forbidden source/tool fallback exists: $forbidden"
 done
-
+if git ls-files -s | grep -q '^160000 '; then
+  die 'a Git submodule remains in the repository'
+fi
+if rg -n --glob 'Cargo.toml' --glob '.cargo/config.toml' \
+  '(path|git)\s*=|replace-with\s*=' .; then
+  die 'Cargo contains a path, Git, or replacement source'
+fi
 if git ls-files '*.lean' 'lakefile.lean' | grep -q .; then
-  echo "handwritten Lean is not permitted" >&2
-  exit 1
+  die 'handwritten Lean is not permitted'
 fi
+mapfile -t source_files < <(find src -mindepth 1 -maxdepth 1 -type f -printf '%f\n' | LC_ALL=C sort)
+expected_source_files=(Calculator.lex.tex CalculatorSystem.lex.tex lib.rs)
+test "${source_files[*]}" = "${expected_source_files[*]}" ||
+  die 'src contains behavior outside the two model roots and package re-export'
+test "$(tr -d '\r' <src/lib.rs)" = $'#![forbid(unsafe_code)]\n\npub use prism_calculator::*;' ||
+  die 'the consumer crate contains handwritten Calculator behavior'
+if rg -n --glob '!public/**' --glob '!artifacts/**' \
+  '(?:test|describe)\.(?:skip|fixme|only)\b|\.skip\(|#\[ignore(?:\([^]]*\))?\]|@(?:ignore|skip)\b|--(?:ignore|ignored|skip)\b|continue-on-error:[[:space:]]*true' \
+  .; then
+  die 'a repository or acceptance test is skipped, filtered, or marked fixme/only'
+fi
+node scripts/test-baseline-evidence.mjs
+node scripts/test-historical-baseline.mjs
+node scripts/test-conformance-result.mjs
+node scripts/test-coverage-contract.mjs
+node scripts/test-target-policy.mjs
+node scripts/test-workflow-policy.mjs
+node scripts/test-acceptance-policy.mjs
+node scripts/test-runtime-binding.mjs
+node scripts/test-external-image-contract.mjs
+node scripts/test-bootstrap-render.mjs
+./scripts/test-sdk-environment.sh
 
-prism=(
-  cargo run
-  --quiet
-  --locked
-  --offline
-  --manifest-path vendor/PrismPM/Cargo.toml
-  --package prismpm
-  --
-  --project "$root"
-  --json
-)
+prismpm template check >/dev/null
+check=$(prismpm --json check)
+application_first=$(prismpm --json build)
+application_id=$(json_field build_id <<<"$application_first")
+verification=$(prismpm --json verify)
+node scripts/test-formal-model-mutations.mjs
+repository=$(release_repository)
+system_a=$(prismpm --json build --locked --release A --tag "$repository:a-candidate")
+system_b=$(prismpm --json build --locked --release B --tag "$repository:b-candidate")
+system_a_id=$(json_field build_id <<<"$system_a")
+system_b_id=$(json_field build_id <<<"$system_b")
+test "$system_a_id" != "$system_b_id" || die 'modeled releases A and B are not distinct'
+record_json repository-check "$check"
+record_json application-build "$application_first"
+record_json verification "$verification"
+record_json system-build-a "$system_a"
+record_json system-build-b "$system_b"
+printf 'CALCULATOR_RELEASE_A=%q\nCALCULATOR_RELEASE_B=%q\n' \
+  "$(digest_reference "$repository" "$system_a")" \
+  "$(digest_reference "$repository" "$system_b")" \
+  >.prism/repository-evidence/releases.env
 
-check_json=$("${prism[@]}" check)
-build_json=$("${prism[@]}" build)
-repeat_json=$("${prism[@]}" build)
-verify_json=$("${prism[@]}" verify)
-
-test "$(jq -r .schema <<<"$check_json")" = "prismpm/check-result/1"
-test "$(jq -r .model_id <<<"$check_json")" = "$(jq -r .inputs.model_id artifacts/build-manifest.json)"
-build_id=$(jq -r .build_id <<<"$build_json")
-test "$build_id" = "$(jq -r .build_id <<<"$repeat_json")"
-test "$build_id" = "$(jq -r .build_id artifacts/application-acceptance.json)"
-test "$(jq -r .build_id <<<"$verify_json")" = "$build_id"
-
-build_root=.prism/build/$build_id
-cmp "$build_root/Calculator.holo" artifacts/Calculator.holo
-cmp "$build_root/manifest.json" artifacts/build-manifest.json
-cmp "$build_root/model.prism.json" artifacts/model.prism.json
-cmp "$build_root/view/view-manifest.json" artifacts/view-manifest.json
-cmp "$build_root/cargo/prism-calculator-0.1.0.crate" registry/prism-calculator-0.1.0.crate
-
-for path in app.css app.js index.html prism_calculator.js prism_calculator_bg.wasm provenance.json
-do
-  cmp "$build_root/view/browser/$path" "public/$path"
+application_root=.prism/build/$application_id
+cmp "$application_root/Calculator.holo" artifacts/Calculator.holo
+cmp "$application_root/manifest.json" artifacts/build-manifest.json
+cmp "$application_root/model.prism.json" artifacts/model.prism.json
+cmp "$application_root/view/view-manifest.json" artifacts/view-manifest.json
+for path in app.css app.js index.html prism_calculator.js prism_calculator_bg.wasm provenance.json; do
+  cmp "$application_root/view/browser/$path" "public/$path"
 done
-
-attestation_id=$(jq -r .attestation_id <<<"$verify_json")
-actual_acceptance=.prism/verified/$attestation_id/application-acceptance.json
-actual_verification=.prism/verified/$attestation_id/manifest.json
-test "$(jq -r .status "$actual_acceptance")" = "verified"
-cmp artifacts/application-acceptance.json "$actual_acceptance"
-cmp artifacts/verification-manifest.json "$actual_verification"
-
-mapfile -t public_files < <(find public -mindepth 1 -maxdepth 1 -type f -printf '%f\n' | sort)
+mapfile -t public_files < <(find public -mindepth 1 -maxdepth 1 -type f -printf '%f\n' | LC_ALL=C sort)
 expected_files=(app.css app.js index.html prism_calculator.js prism_calculator_bg.wasm provenance.json)
-test "${public_files[*]}" = "${expected_files[*]}"
-test -z "$(find public -mindepth 1 -maxdepth 1 ! -type f -print -quit)"
+test "${public_files[*]}" = "${expected_files[*]}" || die 'Pages is not the exact six-file closure'
+test -z "$(find public -mindepth 1 -maxdepth 1 ! -type f -print -quit)" ||
+  die 'Pages closure contains a non-file entry'
 if rg -n 'https?://|XMLHttpRequest|WebSocket|analytics|telemetry' public; then
-  echo "production closure contains an external network or telemetry surface" >&2
-  exit 1
+  die 'portable Pages contains an external network or telemetry surface'
 fi
-if rg -n 'fetch\(' public/app.js; then
-  echo "application behavior contains a network fallback" >&2
-  exit 1
+if rg -n '\bfetch\s*\(' public/app.js; then
+  die 'portable Calculator behavior contains a network fallback'
 fi
 if rg -n 'Number\((left|right|a|b)\b' public/app.js; then
-  echo "operand precision is narrowed through JavaScript Number" >&2
-  exit 1
+  die 'portable Calculator narrows an operand through JavaScript Number'
 fi
-
-registry_home=$(mktemp -d)
-repro_root=$(mktemp -d)
-cleanup() {
-  rm -rf "$registry_home" "$repro_root"
-}
-trap cleanup EXIT
-
-printf '[net]\noffline = true\n\n[source.crates-io]\nreplace-with = "calculator-candidate"\n\n[source.calculator-candidate]\nlocal-registry = "%s"\n' \
-  "$root/registry" > "$registry_home/config.toml"
-CARGO_HOME="$registry_home" cargo generate-lockfile --offline
-CARGO_HOME="$registry_home" cargo check --locked --offline
-CARGO_HOME="$registry_home" cargo test --locked --offline
-CARGO_HOME="$registry_home" cargo clippy --locked --offline --all-targets -- -D warnings
-
-mkdir -p "$repro_root/src"
-for path in lake-manifest.json lakefile.toml lean-toolchain lexlean.lock lexlean.toml prismpm.toml
-do
-  cp "$path" "$repro_root/$path"
-done
-cp src/Calculator.lex.tex "$repro_root/src/Calculator.lex.tex"
-repro_json=$(
-  cargo run \
-    --quiet \
-    --locked \
-    --offline \
-    --manifest-path vendor/PrismPM/Cargo.toml \
-    --package prismpm \
-    -- \
-    --project "$repro_root" \
-    --json \
-    build
-)
-test "$(jq -r .build_id <<<"$repro_json")" = "$build_id"
-diff -qr "$build_root" "$repro_root/.prism/build/$build_id"
-
-npm test
+cargo check --locked --offline
+cargo test --locked --offline
+cargo clippy --locked --offline --all-targets -- -D warnings
+if test "$mode" = --baseline-input; then
+  npx --no-install playwright test
+else
+  npm test
+fi
 sha256sum --check SHA256SUMS
+./scripts/reproduce.sh "$mode"
 
-release=RELEASE-CANDIDATE.json
-sha256_file() {
-  sha256sum "$1" | cut -d ' ' -f 1
-}
-dependency_revision() {
-  local dependency=$1
-  awk -v dependency="$dependency" '
-    $0 == "[[dependency]]" { in_dependency = 1; matched = 0; next }
-    in_dependency && $0 == "id = \"" dependency "\"" { matched = 1; next }
-    matched && /^revision = / {
-      gsub(/^revision = \"|\"$/, "")
-      print
-      exit
-    }
-  ' vendor/PrismPM/model/dependencies.toml
-}
-
-test "$(jq -r .schema "$release")" = "calculator-example/release-candidate/1"
-test "$(jq -r .application "$release")" = "Calculator"
-test "$(jq -r .build_id "$release")" = "$build_id"
-test "$(jq -r .application_acceptance.status "$release")" = "verified"
-test "$(jq -r .application_acceptance.artifact_sha256 "$release")" = \
-  "$(sha256_file artifacts/application-acceptance.json)"
-test "$(jq -r .application_acceptance.verification_manifest_sha256 "$release")" = \
-  "$(sha256_file artifacts/verification-manifest.json)"
-test "$(jq -r .dependencies.prismpm_commit "$release")" = "$expected_prismpm"
-test "$(jq -r .dependencies.lean4_prod_commit "$release")" = \
-  "$(dependency_revision lean4-prod)"
-test "$(jq -r .dependencies.lexlean_commit "$release")" = \
-  "$(dependency_revision lexlean)"
-test "$(jq -r .dependencies.hologram_live_commit "$release")" = \
-  "$(dependency_revision hologram-live)"
-test "$(jq -r .dependencies.uor_hologram_commit "$release")" = \
-  "$(dependency_revision uor-hologram)"
-test "$(jq -r .holo.sha256 "$release")" = "$(sha256_file artifacts/Calculator.holo)"
-test "$(jq -Sc .holo "$release" | jq -Sc 'del(.sha256)')" = \
-  "$(jq -Sc .holo artifacts/application-acceptance.json)"
-test "$(jq -r .model.model_id "$release")" = \
-  "$(sha256_file artifacts/model.prism.json)"
-test "$(jq -r .model.model_id "$release")" = "$(jq -r .model_id public/provenance.json)"
-test "$(jq -r .model.source_id "$release")" = "$(jq -r .source_id artifacts/application-acceptance.json)"
-test "$(jq -r .model.source_root_sha256 "$release")" = \
-  "$(sha256_file src/Calculator.lex.tex)"
-test "$(jq -r .model.generated_core_sha256 "$release")" = \
-  "$(jq -r .generated_core_sha256 public/provenance.json)"
-test "$(jq -r .model.view_model_id "$release")" = \
-  "$(jq -r .view_model_id public/provenance.json)"
-test "$(jq -r '.packages[] | select(.name == "prism-calculator") | .sha256' "$release")" = \
-  "$(sha256_file registry/prism-calculator-0.1.0.crate)"
-test "$(jq -r '.packages[] | select(.name == "prism-stdlib") | .sha256' "$release")" = \
-  "$(sha256_file registry/prism-stdlib-0.1.0.crate)"
-production_manifest_sha=$(
-  find public -mindepth 1 -maxdepth 1 -type f -print0 |
-    LC_ALL=C sort -z |
-    xargs -0 sha256sum |
-    sha256sum |
-    cut -d ' ' -f 1
-)
-test "$(jq -r .pages.production_manifest_sha256 "$release")" = \
-  "$production_manifest_sha"
-
-git diff --exit-code -- public artifacts registry src/Calculator.lex.tex
-
-printf 'calculator-example acceptance passed: build=%s verification=%s\n' \
-  "$build_id" "$attestation_id"
+coverage=.prism/build/$system_b_id/projections/capability-coverage.json
+test -f "$coverage" || die 'generated public-feature coverage is absent'
+node scripts/verify-coverage.mjs "$coverage"
+cmp "$coverage" artifacts/feature-coverage.json
+node scripts/verify-system-projections.mjs ".prism/build/$system_a_id" A
+node scripts/verify-system-projections.mjs ".prism/build/$system_b_id" B
+./scripts/acceptance.sh system "$mode"
+if test "$mode" = --baseline-input; then
+  ./scripts/acceptance.sh pages --baseline-input
+  node scripts/write-baseline-input-evidence.mjs
+fi
+printf 'Calculator repository verification passed\n'

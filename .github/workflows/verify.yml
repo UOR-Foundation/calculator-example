@@ -1,0 +1,67 @@
+name: PrismPM repository gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  shared-sdk-pipeline:
+    name: released PrismPM workflow / ${{ matrix.release }}
+    strategy:
+      fail-fast: false
+      matrix:
+        release: [A, B]
+    uses: UOR-Foundation/PrismPM/.github/workflows/sdk.yml@__PRISMPM_ACTION_COMMIT__
+    with:
+      command: build
+      sdk-image: __PRISMPM_SDK_IMAGE__
+      release: ${{ matrix.release }}
+      reference: ghcr.io/uor-foundation/calculator-system:shared-${{ matrix.release }}
+
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          submodules: false
+      - name: Fetch immutable model inputs through the exact SDK
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: fetch
+          context: .
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - name: Verify repository through the exact SDK
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: verify
+          context: .
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - name: Run the Calculator consumer and reproducibility gate
+        run: |
+          set -eu
+          socket_group=$(stat -c '%g' /var/run/docker.sock)
+          docker_config=$(mktemp -d)
+          trap 'rm -rf "$docker_config"' EXIT
+          if test -f "$HOME/.docker/config.json"; then
+            cp "$HOME/.docker/config.json" "$docker_config/config.json"
+          else
+            printf '{}\n' >"$docker_config/config.json"
+          fi
+          docker run --rm --user "$(id -u):$(id -g)" \
+            --group-add "$socket_group" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --env DOCKER_CONFIG=/tmp/prismpm-docker \
+            --env HOME=/tmp/prismpm-home \
+            --env PRISMPM_EPHEMERAL_HOME=1 \
+            --tmpfs /tmp:rw,exec,nosuid,size=4g \
+            --volume /var/run/docker.sock:/var/run/docker.sock \
+            --volume "$docker_config:/tmp/prismpm-docker:ro" \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+            --workdir "$GITHUB_WORKSPACE" \
+            __PRISMPM_SDK_IMAGE__ bash -eu -o pipefail -c 'just setup && just vv && just vv'

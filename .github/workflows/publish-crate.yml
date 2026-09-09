@@ -1,0 +1,74 @@
+name: Publish exact generated Calculator crate
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: calculator-crates-io-publication
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: crates-io
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Reject publication from an unprotected ref
+        env:
+          REF_PROTECTED: ${{ github.ref_protected }}
+        run: test "$REF_PROTECTED" = true
+      - name: Check out the exact protected revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          submodules: false
+      - name: Require the confined pre-seal package phase
+        run: |
+          set -eu
+          docker run --rm --user "$(id -u):$(id -g)" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --env HOME=/tmp/prismpm-home \
+            --env PRISMPM_EPHEMERAL_HOME=1 \
+            --tmpfs /tmp:rw,exec,nosuid,size=1g \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE:ro" \
+            --workdir "$GITHUB_WORKSPACE" \
+            __PRISMPM_SDK_IMAGE__ node scripts/verify-baseline.mjs --require-package-bootstrap
+      - name: Fetch immutable model inputs through the shared SDK action
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: fetch
+          context: .
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - name: Verify the model and generated application with the shared SDK action
+        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        with:
+          command: verify
+          context: .
+          sdk-image: __PRISMPM_SDK_IMAGE__
+      - id: crates-io
+        name: Obtain a short-lived crates.io trusted-publishing token
+        uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18
+      - name: Reproduce, publish, and independently download the exact archive
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.crates-io.outputs.token }}
+        run: |
+          set -eu
+          socket_group=$(stat -c '%g' /var/run/docker.sock)
+          docker run --rm --user "$(id -u):$(id -g)" \
+            --group-add "$socket_group" \
+            --cap-drop ALL --security-opt no-new-privileges \
+            --env CARGO_REGISTRY_TOKEN \
+            --env HOME=/tmp/prismpm-home \
+            --env PRISMPM_EPHEMERAL_HOME=1 \
+            --tmpfs /tmp:rw,exec,nosuid,size=2g \
+            --volume /var/run/docker.sock:/var/run/docker.sock \
+            --volume "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+            --workdir "$GITHUB_WORKSPACE" \
+            __PRISMPM_SDK_IMAGE__ bash -eu -o pipefail -c \
+            './scripts/publish-calculator-crate.sh'
