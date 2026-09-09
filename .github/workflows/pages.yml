@@ -71,14 +71,14 @@ jobs:
             __PRISMPM_SDK_IMAGE__ node scripts/verify-baseline.mjs "$baseline_argument"
       - name: Fetch immutable model inputs through the locked SDK
         if: inputs.release-reference == ''
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: fetch
           context: .
           sdk-image: __PRISMPM_SDK_IMAGE__
       - name: Verify with the locked SDK
         if: inputs.release-reference == ''
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: verify
           context: .
@@ -100,7 +100,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull the accepted release into a clean local cache
         if: inputs.release-reference != ''
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: pull
           context: .
@@ -109,7 +109,7 @@ jobs:
       - id: pages-release-trust
         name: Explicitly replay accepted release trust after the clean pull
         if: inputs.release-reference != ''
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: verify-release
           context: .

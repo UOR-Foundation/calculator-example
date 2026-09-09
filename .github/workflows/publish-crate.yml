@@ -40,13 +40,13 @@ jobs:
             --workdir "$GITHUB_WORKSPACE" \
             __PRISMPM_SDK_IMAGE__ node scripts/verify-baseline.mjs --require-package-bootstrap
       - name: Fetch immutable model inputs through the shared SDK action
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: fetch
           context: .
           sdk-image: __PRISMPM_SDK_IMAGE__
       - name: Verify the model and generated application with the shared SDK action
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: verify
           context: .

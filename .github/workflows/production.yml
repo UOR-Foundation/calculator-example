@@ -37,13 +37,13 @@ jobs:
             --workdir "$GITHUB_WORKSPACE" \
             __PRISMPM_SDK_IMAGE__ node scripts/verify-baseline.mjs --require-sealed
       - name: Fetch immutable model inputs through the locked SDK
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: fetch
           context: .
           sdk-image: __PRISMPM_SDK_IMAGE__
       - id: a
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: build
           context: .
@@ -51,7 +51,7 @@ jobs:
           release: A
           sdk-image: __PRISMPM_SDK_IMAGE__
       - id: b
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: build
           context: .
@@ -96,7 +96,7 @@ jobs:
           path: .prism
       - id: policy-a
         name: Derive SDK-owned release-A promotion policy
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: prepare-promotion
           context: .
@@ -105,7 +105,7 @@ jobs:
           sdk-image: __PRISMPM_SDK_IMAGE__
       - id: policy-b
         name: Derive SDK-owned release-B promotion policy
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: prepare-promotion
           context: .
@@ -113,7 +113,7 @@ jobs:
           reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}
           sdk-image: __PRISMPM_SDK_IMAGE__
       - name: Sign and immediately verify release A
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: sign
           context: .
@@ -122,7 +122,7 @@ jobs:
           sdk-image: __PRISMPM_SDK_IMAGE__
           trusted-root: ${{ steps.policy-a.outputs.trusted-root-path }}
       - name: Sign and immediately verify release B
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: sign
           context: .
@@ -131,7 +131,7 @@ jobs:
           sdk-image: __PRISMPM_SDK_IMAGE__
           trusted-root: ${{ steps.policy-b.outputs.trusted-root-path }}
       - name: Promote release A to candidate
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: promote
           context: .
@@ -141,7 +141,7 @@ jobs:
           sdk-image: __PRISMPM_SDK_IMAGE__
           trusted-root: ${{ steps.policy-a.outputs.trusted-root-path }}
       - name: Promote release B to candidate
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: promote
           context: .
@@ -151,14 +151,14 @@ jobs:
           sdk-image: __PRISMPM_SDK_IMAGE__
           trusted-root: ${{ steps.policy-b.outputs.trusted-root-path }}
       - name: Push signed candidate A without rebuilding
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: push
           context: .
           reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
           sdk-image: __PRISMPM_SDK_IMAGE__
       - name: Push signed candidate B without rebuilding
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: push
           context: .
@@ -184,7 +184,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull release A into the clean acceptance cache
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: pull
           context: .
@@ -192,14 +192,14 @@ jobs:
           sdk-image: __PRISMPM_SDK_IMAGE__
       - id: candidate-trust-a
         name: Explicitly replay release-A trust after the clean pull
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: verify-release
           context: .
           reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
           sdk-image: __PRISMPM_SDK_IMAGE__
       - name: Pull release B into the clean acceptance cache
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: pull
           context: .
@@ -207,7 +207,7 @@ jobs:
           sdk-image: __PRISMPM_SDK_IMAGE__
       - id: candidate-trust-b
         name: Explicitly replay release-B trust after the clean pull
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: verify-release
           context: .
@@ -294,7 +294,7 @@ jobs:
           path: .prism
       - id: policy-a
         name: Re-derive the exact release-A policy from provenance and protected identity
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: prepare-promotion
           context: .
@@ -303,7 +303,7 @@ jobs:
           sdk-image: __PRISMPM_SDK_IMAGE__
       - id: policy-b
         name: Re-derive the exact release-B policy from provenance and protected identity
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: prepare-promotion
           context: .
@@ -311,7 +311,7 @@ jobs:
           reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}
           sdk-image: __PRISMPM_SDK_IMAGE__
       - name: Sign and verify the complete release-A deployment-evidence closure
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: sign-evidence
           context: .
@@ -320,7 +320,7 @@ jobs:
           sdk-image: __PRISMPM_SDK_IMAGE__
           trusted-root: ${{ steps.policy-a.outputs.trusted-root-path }}
       - name: Sign and verify the complete release-B deployment-evidence closure
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: sign-evidence
           context: .
@@ -329,7 +329,7 @@ jobs:
           sdk-image: __PRISMPM_SDK_IMAGE__
           trusted-root: ${{ steps.policy-b.outputs.trusted-root-path }}
       - name: Promote accepted release A without rebuilding
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: promote
           context: .
@@ -339,7 +339,7 @@ jobs:
           sdk-image: __PRISMPM_SDK_IMAGE__
           trusted-root: ${{ steps.policy-a.outputs.trusted-root-path }}
       - name: Promote accepted release B without rebuilding
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: promote
           context: .
@@ -349,14 +349,14 @@ jobs:
           sdk-image: __PRISMPM_SDK_IMAGE__
           trusted-root: ${{ steps.policy-b.outputs.trusted-root-path }}
       - name: Push accepted release A and its evidence without rebuilding
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: push
           context: .
           reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
           sdk-image: __PRISMPM_SDK_IMAGE__
       - name: Push accepted release B and its evidence without rebuilding
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: push
           context: .
@@ -381,7 +381,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull accepted release A into another clean cache
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: pull
           context: .
@@ -389,21 +389,21 @@ jobs:
           sdk-image: __PRISMPM_SDK_IMAGE__
       - id: verify-release-a
         name: Independently replay every release-A signature and promotion decision
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: verify-release
           context: .
           reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
           sdk-image: __PRISMPM_SDK_IMAGE__
       - id: inspect-a
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: inspect
           context: .
           reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-a }}
           sdk-image: __PRISMPM_SDK_IMAGE__
       - name: Pull accepted release B into another clean cache
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: pull
           context: .
@@ -411,14 +411,14 @@ jobs:
           sdk-image: __PRISMPM_SDK_IMAGE__
       - id: verify-release-b
         name: Independently replay every release-B signature and promotion decision
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: verify-release
           context: .
           reference: ghcr.io/uor-foundation/calculator-system@${{ needs.build.outputs.release-b }}
           sdk-image: __PRISMPM_SDK_IMAGE__
       - id: inspect-b
-        uses: UOR-Foundation/PrismPM/action@__PRISMPM_ACTION_COMMIT__
+        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
         with:
           command: inspect
           context: .
