@@ -86,7 +86,8 @@ export function validateWorkflowPolicy(workflows) {
     if (name === 'template-update.yml') {
       const copy = source.match(/for path in (.+); do/);
       const paths = copy?.[1].split(' ');
-      if (JSON.stringify(paths) !== JSON.stringify([
+      if (/\.github\/(?:workflows\/(?:ci|honesty)\.yml|actions\/prismpm)/.test(source) ||
+          JSON.stringify(paths) !== JSON.stringify([
         'AGENTS.md', 'VERIFICATION.md', 'template-contract.json', '.github/workflows/bootstrap.yml',
       ]) || !source.includes('./bootstrap/render.sh "$SDK_IMAGE" "$ACTION_REFERENCE" "$TEMPLATE_REVISION" "$RUNTIME_IMAGE"') ||
           !source.includes('prismpm.lock standards.lock template-contract.json template.lock') ||

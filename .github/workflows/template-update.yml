@@ -63,10 +63,6 @@ jobs:
           for path in AGENTS.md VERIFICATION.md template-contract.json .github/workflows/bootstrap.yml; do
             install -D -m 0644 ".template-policy/$path" "$path"
           done
-          rm -f \
-            .github/workflows/ci.yml \
-            .github/workflows/honesty.yml
-          rm -rf .github/actions/prismpm
           rm -rf .template-policy
           git -c user.name='Template policy proposal' \
             -c user.email='template-policy@example.invalid' \

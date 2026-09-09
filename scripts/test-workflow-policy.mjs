@@ -69,6 +69,9 @@ reject('production-pages-unverified', 'production.yml', (source) =>
 reject('copied-renderer-overwrite', 'template-update.yml', (source) =>
   source.replace('for path in AGENTS.md', 'for path in bootstrap/render.sh AGENTS.md'),
   /project ownership/);
+reject('project-gate-deletion', 'template-update.yml', (source) =>
+  source.replace('rm -rf .template-policy', 'rm -f .github/workflows/honesty.yml'),
+  /project ownership/);
 reject('runtime-update-omitted', 'template-update.yml', (source) =>
   source.replace('"$TEMPLATE_REVISION" "$RUNTIME_IMAGE"', '"$TEMPLATE_REVISION"'),
   /complete runtime update/);
