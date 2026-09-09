@@ -2,8 +2,8 @@ spec = "lexlean/project/1"
 name = "prism-calculator"
 language = "1.1"
 module_prefix = "PrismCalculator"
-source_roots = ["src"]
-entrypoints = ["src/Calculator.lex.tex"]
+source_roots = [".prism/sdk/inputs/stdlib", "src"]
+entrypoints = ["src/Calculator.lex.tex", "src/CalculatorSystem.lex.tex"]
 build_root = ".lexlean"
 lockfile = "lexlean.lock"
 lean_workspace = "."
@@ -12,6 +12,21 @@ lean_toolchain = "leanprover/lean4:v4.32.1"
 [[lexicon_source]]
 package = "lexlean.std.nat"
 kind = "builtin"
+
+[[lexicon_source]]
+package = "prism.arch"
+kind = "path"
+path = ".prism/sdk/inputs/language/prism.arch"
+
+[[lexicon_source]]
+package = "prism.qual"
+kind = "path"
+path = ".prism/sdk/inputs/language/prism.qual"
+
+[[lexicon_source]]
+package = "prism.sec"
+kind = "path"
+path = ".prism/sdk/inputs/language/prism.sec"
 
 [limits]
 max_file_bytes = 4194304
