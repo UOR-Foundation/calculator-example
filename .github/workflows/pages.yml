@@ -93,7 +93,7 @@ jobs:
           [[ "$RELEASE_REFERENCE" =~ ^ghcr\.io/uor-foundation/calculator-system@sha256:[0-9a-f]{64}$ ]]
       - name: Authenticate the clean accepted-release pull
         if: inputs.release-reference != ''
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
