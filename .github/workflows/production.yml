@@ -59,7 +59,7 @@ jobs:
           release: B
           sdk-image: __PRISMPM_SDK_IMAGE__
       - name: Transfer the exact built graphs without publishing
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: calculator-built-store
           path: .prism
@@ -257,7 +257,7 @@ jobs:
             --workdir "$GITHUB_WORKSPACE" \
             __PRISMPM_SDK_IMAGE__ bash -eu -o pipefail -c 'just setup && just accept-system'
       - name: Transfer the accepted local graphs and evidence without publishing
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: calculator-accepted-store
           path: .prism
