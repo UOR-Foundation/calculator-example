@@ -31,13 +31,13 @@ jobs:
           persist-credentials: false
           submodules: false
       - name: Fetch immutable model inputs through the exact SDK
-        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
+        uses: UOR-Foundation/PrismPM/action@f50d6ab459344caa2bc64a45460b538f1d56b7e6
         with:
           command: fetch
           context: .
           sdk-image: __PRISMPM_SDK_IMAGE__
       - name: Verify repository through the exact SDK
-        uses: UOR-Foundation/PrismPM/action@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
+        uses: UOR-Foundation/PrismPM/action@f50d6ab459344caa2bc64a45460b538f1d56b7e6
         with:
           command: verify
           context: .
