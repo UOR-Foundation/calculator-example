@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         release: [A, B]
-    uses: UOR-Foundation/PrismPM/.github/workflows/sdk.yml@d20a1f9455a0719ba5ec162b7c28f4f1855f4882
+    uses: UOR-Foundation/PrismPM/.github/workflows/sdk.yml@f50d6ab459344caa2bc64a45460b538f1d56b7e6
     with:
       command: build
       sdk-image: __PRISMPM_SDK_IMAGE__
