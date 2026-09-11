@@ -93,7 +93,7 @@ jobs:
           test -f .prism/platform-root/build/system.prism.json
           test -f .prism/platform-root/oci/index.json
       - name: Upload the complete architecture closure
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: calculator-root-${{ matrix.release }}-${{ matrix.architecture }}
           path: .prism/platform-root
@@ -101,7 +101,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
       - name: Upload the canonical build-result binding
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: calculator-result-${{ matrix.release }}-${{ matrix.architecture }}
           path: .prism/platform-input/result.json
@@ -183,7 +183,7 @@ jobs:
               done
             '
       - name: Upload canonical platform-equivalence reports
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: calculator-platform-equivalence
           path: artifacts/platform-equivalence

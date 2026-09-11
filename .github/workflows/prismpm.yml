@@ -157,7 +157,7 @@ jobs:
           mkdir -p .prism/ci
           printf '%s' "$RESULT" > .prism/ci/build.json
       - name: Preserve the exact OCI graph and canonical result
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: prismpm-product-release
           if-no-files-found: error
@@ -286,7 +286,7 @@ jobs:
           sdk-image: ${{ needs.resolve-sdk.outputs.sdk-image }}
           target: ${{ inputs.target }}
       - name: Preserve the exact target-state-bound plan as inert data
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: prismpm-deployment-plan
           if-no-files-found: error
@@ -351,7 +351,7 @@ jobs:
           reference: ${{ needs.promote.outputs.immutable-reference }}
           sdk-image: ${{ needs.resolve-sdk.outputs.sdk-image }}
       - name: Preserve target state for independent post-deployment verification
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: prismpm-deployment-state
           if-no-files-found: error
@@ -456,7 +456,7 @@ jobs:
           reference: ${{ needs.promote.outputs.immutable-reference }}
           sdk-image: ${{ needs.resolve-sdk.outputs.sdk-image }}
       - name: Preserve the conformance-bearing graph for protected acceptance
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: prismpm-accepted-input
           if-no-files-found: error
