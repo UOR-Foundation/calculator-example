@@ -8,7 +8,7 @@
     "test:live": "node scripts/verify-baseline.mjs --require-sealed --live && BASE_URL=https://uor-foundation.github.io/calculator-example/ playwright test"
   },
   "devDependencies": {
-    "@axe-core/playwright": "4.13.0",
+    "@axe-core/playwright": "4.14.0",
     "@playwright/test": "1.62.1",
     "http-server": "14.1.1"
   }
