@@ -1,8 +1,436 @@
 \begin{lexlean}{Calculator}
-\useglossary{lexlean.std.bool@1.1.0}
-\useglossary{lexlean.std.nat@1.1.0}
+\useglossary{lexlean.std.bool@1.2.0}
+\useglossary{lexlean.std.nat@1.2.0}
 \title{Boolean}
 \begin{semanticmodule}
-\semanticdata{{"declarations":[{"constructors":[{"fields":[],"name":"Add"},{"fields":[],"name":"Subtract"},{"fields":[],"name":"Multiply"},{"fields":[],"name":"Divide"}],"kind":"inductive","name":"Operation","parameters":[],"type_parameters":[]},{"constructors":[{"fields":[],"name":"DivisionByZero"},{"fields":[],"name":"Overflow"}],"kind":"inductive","name":"CalculatorError","parameters":[],"type_parameters":[]},{"constructors":[{"fields":[],"name":"MalformedRequest"},{"fields":[],"name":"UnsupportedVersion"},{"fields":[],"name":"UnknownOperation"}],"kind":"inductive","name":"ProtocolError","parameters":[],"type_parameters":[]},{"fields":[{"name":"label","type":{"kind":"string"}},{"name":"requestName","type":{"kind":"string"}},{"name":"rustVariant","type":{"kind":"string"}},{"name":"discriminant","type":{"kind":"uint8"}}],"kind":"structure","name":"ViewOperation","parameters":[],"type_parameters":[]},{"fields":[{"name":"title","type":{"kind":"string"}},{"name":"heading","type":{"kind":"string"}},{"name":"leftLabel","type":{"kind":"string"}},{"name":"rightLabel","type":{"kind":"string"}},{"name":"operationLabel","type":{"kind":"string"}},{"name":"submitLabel","type":{"kind":"string"}},{"name":"inputError","type":{"kind":"string"}},{"name":"divisionError","type":{"kind":"string"}},{"name":"overflowError","type":{"kind":"string"}},{"name":"livePolite","type":{"kind":"bool"}},{"name":"retainFocus","type":{"kind":"bool"}},{"name":"submitOnEnter","type":{"kind":"bool"}},{"name":"hologramIntent","type":{"kind":"bool"}},{"name":"pagesAdapter","type":{"kind":"bool"}},{"name":"operations","type":{"element":{"arguments":[],"kind":"named","member":{"name":"ViewOperation"}},"kind":"list"}},{"name":"initialOperation","type":{"kind":"uint8"}}],"kind":"structure","name":"CalculatorView","parameters":[],"type_parameters":[]},{"fields":[{"name":"operation","type":{"arguments":[],"kind":"named","member":{"name":"Operation"}}},{"name":"left","type":{"kind":"int64"}},{"name":"right","type":{"kind":"int64"}}],"kind":"structure","name":"Request","parameters":[],"type_parameters":[]},{"constructors":[{"fields":[],"name":"AsciiSignedI64"}],"kind":"inductive","name":"InputGrammar","parameters":[],"type_parameters":[]},{"constructors":[{"fields":[],"name":"Submit"},{"fields":[],"name":"Enter"}],"kind":"inductive","name":"ViewAction","parameters":[],"type_parameters":[]},{"constructors":[{"fields":[],"name":"Polite"}],"kind":"inductive","name":"LiveMode","parameters":[],"type_parameters":[]},{"constructors":[{"fields":[],"name":"Compact"},{"fields":[],"name":"HighContrast"},{"fields":[],"name":"SystemSans"}],"kind":"inductive","name":"StyleToken","parameters":[],"type_parameters":[]},{"constructors":[{"fields":[],"name":"HologramPortable"},{"fields":[],"name":"GithubPages"}],"kind":"inductive","name":"PresentationTarget","parameters":[],"type_parameters":[]},{"fields":[{"name":"request","type":{"kind":"bytes"}},{"name":"response","type":{"kind":"bytes"}}],"kind":"structure","name":"AcceptanceVector","parameters":[],"type_parameters":[]},{"fields":[{"name":"name","type":{"kind":"string"}},{"name":"cargoName","type":{"kind":"string"}},{"name":"cargoVersion","type":{"kind":"string"}},{"name":"cargoDescription","type":{"kind":"string"}},{"name":"cargoRepository","type":{"kind":"string"}},{"name":"cargoHomepage","type":{"kind":"string"}},{"name":"libraryRoots","type":{"element":{"kind":"string"},"kind":"list"}},{"name":"operationType","type":{"kind":"string"}},{"name":"errorType","type":{"kind":"string"}},{"name":"functionName","type":{"kind":"string"}},{"name":"acceptanceVectors","type":{"element":{"arguments":[],"kind":"named","member":{"name":"AcceptanceVector"}},"kind":"list"}},{"name":"entryRoot","type":{"kind":"string"}},{"name":"coreContract","type":{"kind":"string"}},{"name":"requestMaximum","type":{"kind":"uint32"}},{"name":"responseMaximum","type":{"kind":"uint32"}},{"name":"guestAllocationMaximum","type":{"kind":"uint32"}},{"name":"capabilitiesEmpty","type":{"kind":"bool"}},{"name":"fatArchive","type":{"kind":"bool"}},{"name":"primaryLayer","type":{"kind":"uint8"}},{"name":"viewLayer","type":{"kind":"uint8"}},{"name":"view","type":{"arguments":[],"kind":"named","member":{"name":"CalculatorView"}}},{"name":"inputGrammar","type":{"arguments":[],"kind":"named","member":{"name":"InputGrammar"}}},{"name":"liveMode","type":{"arguments":[],"kind":"named","member":{"name":"LiveMode"}}},{"name":"layout","type":{"arguments":[],"kind":"named","member":{"name":"StyleToken"}}},{"name":"color","type":{"arguments":[],"kind":"named","member":{"name":"StyleToken"}}},{"name":"typography","type":{"arguments":[],"kind":"named","member":{"name":"StyleToken"}}},{"name":"actions","type":{"element":{"arguments":[],"kind":"named","member":{"name":"ViewAction"}},"kind":"list"}},{"name":"targets","type":{"element":{"arguments":[],"kind":"named","member":{"name":"PresentationTarget"}},"kind":"list"}}],"kind":"structure","name":"CalculatorApplication","parameters":[],"type_parameters":[]},{"axioms":[],"body":{"branches":[{"binders":[],"body":{"branches":[{"binders":[],"body":{"arguments":[{"arguments":[],"constructor":{"name":"CalculatorError.Overflow"},"kind":"constructor"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"kind":"int64"},{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}}]},"constructor":{"name":"Option.none"}},{"binders":["value"],"body":{"arguments":[{"kind":"var","name":"value"}],"constructor":{"name":"Result.ok"},"kind":"constructor","type_arguments":[{"kind":"int64"},{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}}]},"constructor":{"name":"Option.some"}}],"kind":"match","scrutinee":{"arguments":[{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"kind":"primitive","operation":"checked_add","result":{"kind":"option","value":{"kind":"int64"}}}},"constructor":{"name":"Operation.Add"}},{"binders":[],"body":{"branches":[{"binders":[],"body":{"arguments":[{"arguments":[],"constructor":{"name":"CalculatorError.Overflow"},"kind":"constructor"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"kind":"int64"},{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}}]},"constructor":{"name":"Option.none"}},{"binders":["value"],"body":{"arguments":[{"kind":"var","name":"value"}],"constructor":{"name":"Result.ok"},"kind":"constructor","type_arguments":[{"kind":"int64"},{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}}]},"constructor":{"name":"Option.some"}}],"kind":"match","scrutinee":{"arguments":[{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"kind":"primitive","operation":"checked_subtract","result":{"kind":"option","value":{"kind":"int64"}}}},"constructor":{"name":"Operation.Subtract"}},{"binders":[],"body":{"branches":[{"binders":[],"body":{"arguments":[{"arguments":[],"constructor":{"name":"CalculatorError.Overflow"},"kind":"constructor"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"kind":"int64"},{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}}]},"constructor":{"name":"Option.none"}},{"binders":["value"],"body":{"arguments":[{"kind":"var","name":"value"}],"constructor":{"name":"Result.ok"},"kind":"constructor","type_arguments":[{"kind":"int64"},{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}}]},"constructor":{"name":"Option.some"}}],"kind":"match","scrutinee":{"arguments":[{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"kind":"primitive","operation":"checked_multiply","result":{"kind":"option","value":{"kind":"int64"}}}},"constructor":{"name":"Operation.Multiply"}},{"binders":[],"body":{"condition":{"arguments":[{"kind":"var","name":"right"},{"kind":"integer","representation":"int64","value":"0"}],"kind":"primitive","operation":"equal","result":{"kind":"bool"}},"else_value":{"branches":[{"binders":[],"body":{"arguments":[{"arguments":[],"constructor":{"name":"CalculatorError.Overflow"},"kind":"constructor"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"kind":"int64"},{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}}]},"constructor":{"name":"Option.none"}},{"binders":["value"],"body":{"arguments":[{"kind":"var","name":"value"}],"constructor":{"name":"Result.ok"},"kind":"constructor","type_arguments":[{"kind":"int64"},{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}}]},"constructor":{"name":"Option.some"}}],"kind":"match","scrutinee":{"arguments":[{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"kind":"primitive","operation":"checked_quotient","result":{"kind":"option","value":{"kind":"int64"}}}},"kind":"if","then_value":{"arguments":[{"arguments":[],"constructor":{"name":"CalculatorError.DivisionByZero"},"kind":"constructor"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"kind":"int64"},{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}}]}},"constructor":{"name":"Operation.Divide"}}],"kind":"match","scrutinee":{"kind":"var","name":"operation"}},"kind":"definition","name":"calculate","parameters":[{"name":"operation","type":{"arguments":[],"kind":"named","member":{"name":"Operation"}}},{"name":"left","type":{"kind":"int64"}},{"name":"right","type":{"kind":"int64"}}],"result":{"error":{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}},"kind":"result","ok":{"kind":"int64"}}},{"body":{"fields":[{"field":"title","value":{"kind":"string","value":"Calculator"}},{"field":"heading","value":{"kind":"string","value":"Calculator"}},{"field":"leftLabel","value":{"kind":"string","value":"Left operand"}},{"field":"rightLabel","value":{"kind":"string","value":"Right operand"}},{"field":"operationLabel","value":{"kind":"string","value":"Operation"}},{"field":"submitLabel","value":{"kind":"string","value":"Calculate"}},{"field":"inputError","value":{"kind":"string","value":"Enter a signed 64-bit integer."}},{"field":"divisionError","value":{"kind":"string","value":"Division by zero."}},{"field":"overflowError","value":{"kind":"string","value":"Arithmetic overflow."}},{"field":"livePolite","value":{"kind":"bool","value":true}},{"field":"retainFocus","value":{"kind":"bool","value":true}},{"field":"submitOnEnter","value":{"kind":"bool","value":true}},{"field":"hologramIntent","value":{"kind":"bool","value":true}},{"field":"pagesAdapter","value":{"kind":"bool","value":true}},{"field":"operations","value":{"head":{"fields":[{"field":"label","value":{"kind":"string","value":"Add"}},{"field":"requestName","value":{"kind":"string","value":"add"}},{"field":"rustVariant","value":{"kind":"string","value":"Add"}},{"field":"discriminant","value":{"kind":"integer","representation":"uint8","value":"0"}}],"kind":"record","type":{"name":"ViewOperation"}},"kind":"cons","tail":{"head":{"fields":[{"field":"label","value":{"kind":"string","value":"Subtract"}},{"field":"requestName","value":{"kind":"string","value":"subtract"}},{"field":"rustVariant","value":{"kind":"string","value":"Subtract"}},{"field":"discriminant","value":{"kind":"integer","representation":"uint8","value":"1"}}],"kind":"record","type":{"name":"ViewOperation"}},"kind":"cons","tail":{"head":{"fields":[{"field":"label","value":{"kind":"string","value":"Multiply"}},{"field":"requestName","value":{"kind":"string","value":"multiply"}},{"field":"rustVariant","value":{"kind":"string","value":"Multiply"}},{"field":"discriminant","value":{"kind":"integer","representation":"uint8","value":"2"}}],"kind":"record","type":{"name":"ViewOperation"}},"kind":"cons","tail":{"head":{"fields":[{"field":"label","value":{"kind":"string","value":"Divide"}},{"field":"requestName","value":{"kind":"string","value":"divide"}},{"field":"rustVariant","value":{"kind":"string","value":"Divide"}},{"field":"discriminant","value":{"kind":"integer","representation":"uint8","value":"3"}}],"kind":"record","type":{"name":"ViewOperation"}},"kind":"cons","tail":{"element":{"arguments":[],"kind":"named","member":{"name":"ViewOperation"}},"kind":"nil"}}}}}},{"field":"initialOperation","value":{"kind":"integer","representation":"uint8","value":"0"}}],"kind":"record","type":{"name":"CalculatorView"}},"kind":"definition","name":"calculatorView","parameters":[],"result":{"arguments":[],"kind":"named","member":{"name":"CalculatorView"}}},{"axioms":[],"body":{"kind":"eq","left":{"arguments":[{"kind":"var","name":"operation"},{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"function":{"name":"calculate"},"kind":"call"},"right":{"arguments":[{"kind":"var","name":"operation"},{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"function":{"name":"calculate"},"kind":"call"}},"kind":"definition","name":"calculationCorrect","parameters":[{"name":"operation","type":{"arguments":[],"kind":"named","member":{"name":"Operation"}}},{"name":"left","type":{"kind":"int64"}},{"name":"right","type":{"kind":"int64"}}],"result":{"kind":"prop"}},{"axioms":[],"kind":"theorem","name":"calculate_correct","parameters":[{"name":"operation","type":{"arguments":[],"kind":"named","member":{"name":"Operation"}}},{"name":"left","type":{"kind":"int64"}},{"name":"right","type":{"kind":"int64"}}],"proof":{"kind":"reflexivity"},"statement":{"arguments":[{"kind":"var","name":"operation"},{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"function":{"name":"calculationCorrect"},"kind":"call"}},{"axioms":[],"body":{"condition":{"arguments":[{"kind":"var","name":"value"},{"kind":"string","value":"add"}],"kind":"primitive","operation":"equal","result":{"kind":"bool"}},"else_value":{"condition":{"arguments":[{"kind":"var","name":"value"},{"kind":"string","value":"subtract"}],"kind":"primitive","operation":"equal","result":{"kind":"bool"}},"else_value":{"condition":{"arguments":[{"kind":"var","name":"value"},{"kind":"string","value":"multiply"}],"kind":"primitive","operation":"equal","result":{"kind":"bool"}},"else_value":{"condition":{"arguments":[{"kind":"var","name":"value"},{"kind":"string","value":"divide"}],"kind":"primitive","operation":"equal","result":{"kind":"bool"}},"else_value":{"arguments":[{"arguments":[],"constructor":{"name":"ProtocolError.UnknownOperation"},"kind":"constructor"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"arguments":[],"kind":"named","member":{"name":"Operation"}},{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}}]},"kind":"if","then_value":{"arguments":[{"arguments":[],"constructor":{"name":"Operation.Divide"},"kind":"constructor"}],"constructor":{"name":"Result.ok"},"kind":"constructor","type_arguments":[{"arguments":[],"kind":"named","member":{"name":"Operation"}},{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}}]}},"kind":"if","then_value":{"arguments":[{"arguments":[],"constructor":{"name":"Operation.Multiply"},"kind":"constructor"}],"constructor":{"name":"Result.ok"},"kind":"constructor","type_arguments":[{"arguments":[],"kind":"named","member":{"name":"Operation"}},{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}}]}},"kind":"if","then_value":{"arguments":[{"arguments":[],"constructor":{"name":"Operation.Subtract"},"kind":"constructor"}],"constructor":{"name":"Result.ok"},"kind":"constructor","type_arguments":[{"arguments":[],"kind":"named","member":{"name":"Operation"}},{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}}]}},"kind":"if","then_value":{"arguments":[{"arguments":[],"constructor":{"name":"Operation.Add"},"kind":"constructor"}],"constructor":{"name":"Result.ok"},"kind":"constructor","type_arguments":[{"arguments":[],"kind":"named","member":{"name":"Operation"}},{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}}]}},"kind":"definition","name":"parseOperation","parameters":[{"name":"value","type":{"kind":"string"}}],"result":{"error":{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}},"kind":"result","ok":{"arguments":[],"kind":"named","member":{"name":"Operation"}}}},{"axioms":["Classical.choice","Quot.sound","propext"],"body":{"branches":[{"binders":[],"body":{"arguments":[{"arguments":[],"constructor":{"name":"ProtocolError.MalformedRequest"},"kind":"constructor"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"arguments":[],"kind":"named","member":{"name":"Request"}},{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}}]},"constructor":{"name":"Option.none"}},{"binders":["right"],"body":{"arguments":[{"fields":[{"field":"operation","value":{"kind":"var","name":"operation"}},{"field":"left","value":{"kind":"var","name":"left"}},{"field":"right","value":{"kind":"var","name":"right"}}],"kind":"record","type":{"name":"Request"}}],"constructor":{"name":"Result.ok"},"kind":"constructor","type_arguments":[{"arguments":[],"kind":"named","member":{"name":"Request"}},{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}}]},"constructor":{"name":"Option.some"}}],"kind":"match","scrutinee":{"arguments":[{"kind":"var","name":"rightText"}],"kind":"primitive","operation":"parse_decimal","result":{"kind":"option","value":{"kind":"int64"}}}},"kind":"definition","name":"decodeRight","parameters":[{"name":"operation","type":{"arguments":[],"kind":"named","member":{"name":"Operation"}}},{"name":"left","type":{"kind":"int64"}},{"name":"rightText","type":{"kind":"string"}}],"result":{"error":{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}},"kind":"result","ok":{"arguments":[],"kind":"named","member":{"name":"Request"}}}},{"axioms":["Classical.choice","Quot.sound","propext"],"body":{"branches":[{"binders":[],"body":{"arguments":[{"arguments":[],"constructor":{"name":"ProtocolError.MalformedRequest"},"kind":"constructor"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"arguments":[],"kind":"named","member":{"name":"Request"}},{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}}]},"constructor":{"name":"Option.none"}},{"binders":["left"],"body":{"arguments":[{"kind":"var","name":"operation"},{"kind":"var","name":"left"},{"kind":"var","name":"rightText"}],"function":{"name":"decodeRight"},"kind":"call"},"constructor":{"name":"Option.some"}}],"kind":"match","scrutinee":{"arguments":[{"kind":"var","name":"leftText"}],"kind":"primitive","operation":"parse_decimal","result":{"kind":"option","value":{"kind":"int64"}}}},"kind":"definition","name":"decodeLeft","parameters":[{"name":"operation","type":{"arguments":[],"kind":"named","member":{"name":"Operation"}}},{"name":"leftText","type":{"kind":"string"}},{"name":"rightText","type":{"kind":"string"}}],"result":{"error":{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}},"kind":"result","ok":{"arguments":[],"kind":"named","member":{"name":"Request"}}}},{"axioms":["Classical.choice","Quot.sound","propext"],"body":{"condition":{"arguments":[{"kind":"var","name":"version"},{"kind":"string","value":"1"}],"kind":"primitive","operation":"equal","result":{"kind":"bool"}},"else_value":{"arguments":[{"arguments":[],"constructor":{"name":"ProtocolError.UnsupportedVersion"},"kind":"constructor"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"arguments":[],"kind":"named","member":{"name":"Request"}},{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}}]},"kind":"if","then_value":{"branches":[{"binders":["error"],"body":{"arguments":[{"kind":"var","name":"error"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"arguments":[],"kind":"named","member":{"name":"Request"}},{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}}]},"constructor":{"name":"Result.error"}},{"binders":["operation"],"body":{"arguments":[{"kind":"var","name":"operation"},{"kind":"var","name":"leftText"},{"kind":"var","name":"rightText"}],"function":{"name":"decodeLeft"},"kind":"call"},"constructor":{"name":"Result.ok"}}],"kind":"match","scrutinee":{"arguments":[{"kind":"var","name":"operationText"}],"function":{"name":"parseOperation"},"kind":"call"}}},"kind":"definition","name":"decodeComplete","parameters":[{"name":"version","type":{"kind":"string"}},{"name":"operationText","type":{"kind":"string"}},{"name":"leftText","type":{"kind":"string"}},{"name":"rightText","type":{"kind":"string"}}],"result":{"error":{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}},"kind":"result","ok":{"arguments":[],"kind":"named","member":{"name":"Request"}}}},{"axioms":["Classical.choice","Quot.sound","propext"],"body":{"branches":[{"binders":[],"body":{"arguments":[{"kind":"var","name":"version"},{"kind":"var","name":"operationText"},{"kind":"var","name":"leftText"},{"kind":"var","name":"rightText"}],"function":{"name":"decodeComplete"},"kind":"call"},"constructor":{"name":"List.nil"}},{"binders":["extra","rest"],"body":{"arguments":[{"arguments":[],"constructor":{"name":"ProtocolError.MalformedRequest"},"kind":"constructor"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"arguments":[],"kind":"named","member":{"name":"Request"}},{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}}]},"constructor":{"name":"List.cons"}}],"kind":"match","scrutinee":{"kind":"var","name":"values"}},"kind":"definition","name":"decodeTail4","parameters":[{"name":"version","type":{"kind":"string"}},{"name":"operationText","type":{"kind":"string"}},{"name":"leftText","type":{"kind":"string"}},{"name":"rightText","type":{"kind":"string"}},{"name":"values","type":{"element":{"kind":"string"},"kind":"list"}}],"result":{"error":{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}},"kind":"result","ok":{"arguments":[],"kind":"named","member":{"name":"Request"}}}},{"axioms":["Classical.choice","Quot.sound","propext"],"body":{"branches":[{"binders":[],"body":{"arguments":[{"arguments":[],"constructor":{"name":"ProtocolError.MalformedRequest"},"kind":"constructor"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"arguments":[],"kind":"named","member":{"name":"Request"}},{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}}]},"constructor":{"name":"List.nil"}},{"binders":["rightText","rest"],"body":{"arguments":[{"kind":"var","name":"version"},{"kind":"var","name":"operationText"},{"kind":"var","name":"leftText"},{"kind":"var","name":"rightText"},{"kind":"var","name":"rest"}],"function":{"name":"decodeTail4"},"kind":"call"},"constructor":{"name":"List.cons"}}],"kind":"match","scrutinee":{"kind":"var","name":"values"}},"kind":"definition","name":"decodeTail3","parameters":[{"name":"version","type":{"kind":"string"}},{"name":"operationText","type":{"kind":"string"}},{"name":"leftText","type":{"kind":"string"}},{"name":"values","type":{"element":{"kind":"string"},"kind":"list"}}],"result":{"error":{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}},"kind":"result","ok":{"arguments":[],"kind":"named","member":{"name":"Request"}}}},{"axioms":["Classical.choice","Quot.sound","propext"],"body":{"branches":[{"binders":[],"body":{"arguments":[{"arguments":[],"constructor":{"name":"ProtocolError.MalformedRequest"},"kind":"constructor"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"arguments":[],"kind":"named","member":{"name":"Request"}},{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}}]},"constructor":{"name":"List.nil"}},{"binders":["leftText","rest"],"body":{"arguments":[{"kind":"var","name":"version"},{"kind":"var","name":"operationText"},{"kind":"var","name":"leftText"},{"kind":"var","name":"rest"}],"function":{"name":"decodeTail3"},"kind":"call"},"constructor":{"name":"List.cons"}}],"kind":"match","scrutinee":{"kind":"var","name":"values"}},"kind":"definition","name":"decodeTail2","parameters":[{"name":"version","type":{"kind":"string"}},{"name":"operationText","type":{"kind":"string"}},{"name":"values","type":{"element":{"kind":"string"},"kind":"list"}}],"result":{"error":{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}},"kind":"result","ok":{"arguments":[],"kind":"named","member":{"name":"Request"}}}},{"axioms":["Classical.choice","Quot.sound","propext"],"body":{"branches":[{"binders":[],"body":{"arguments":[{"arguments":[],"constructor":{"name":"ProtocolError.MalformedRequest"},"kind":"constructor"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"arguments":[],"kind":"named","member":{"name":"Request"}},{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}}]},"constructor":{"name":"List.nil"}},{"binders":["operationText","rest"],"body":{"arguments":[{"kind":"var","name":"version"},{"kind":"var","name":"operationText"},{"kind":"var","name":"rest"}],"function":{"name":"decodeTail2"},"kind":"call"},"constructor":{"name":"List.cons"}}],"kind":"match","scrutinee":{"kind":"var","name":"values"}},"kind":"definition","name":"decodeTail1","parameters":[{"name":"version","type":{"kind":"string"}},{"name":"values","type":{"element":{"kind":"string"},"kind":"list"}}],"result":{"error":{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}},"kind":"result","ok":{"arguments":[],"kind":"named","member":{"name":"Request"}}}},{"axioms":["Classical.choice","Quot.sound","propext"],"body":{"branches":[{"binders":[],"body":{"arguments":[{"arguments":[],"constructor":{"name":"ProtocolError.MalformedRequest"},"kind":"constructor"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"arguments":[],"kind":"named","member":{"name":"Request"}},{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}}]},"constructor":{"name":"List.nil"}},{"binders":["version","rest"],"body":{"arguments":[{"kind":"var","name":"version"},{"kind":"var","name":"rest"}],"function":{"name":"decodeTail1"},"kind":"call"},"constructor":{"name":"List.cons"}}],"kind":"match","scrutinee":{"kind":"var","name":"values"}},"kind":"definition","name":"decodeFields","parameters":[{"name":"values","type":{"element":{"kind":"string"},"kind":"list"}}],"result":{"error":{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}},"kind":"result","ok":{"arguments":[],"kind":"named","member":{"name":"Request"}}}},{"axioms":["Classical.choice","Quot.sound","propext"],"body":{"branches":[{"binders":[],"body":{"arguments":[{"arguments":[],"constructor":{"name":"ProtocolError.MalformedRequest"},"kind":"constructor"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"arguments":[],"kind":"named","member":{"name":"Request"}},{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}}]},"constructor":{"name":"Option.none"}},{"binders":["fields"],"body":{"arguments":[{"kind":"var","name":"fields"}],"function":{"name":"decodeFields"},"kind":"call"},"constructor":{"name":"Option.some"}}],"kind":"match","scrutinee":{"arguments":[{"kind":"var","name":"value"},{"kind":"string","value":"\t"},{"kind":"integer","representation":"uint32","value":"4"}],"kind":"primitive","operation":"split_exact","result":{"kind":"option","value":{"element":{"kind":"string"},"kind":"list"}}}},"kind":"definition","name":"decodeRequest","parameters":[{"name":"value","type":{"kind":"string"}}],"result":{"error":{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}},"kind":"result","ok":{"arguments":[],"kind":"named","member":{"name":"Request"}}}},{"axioms":[],"body":{"branches":[{"binders":[],"body":{"kind":"string","value":"1\terror\tmalformed-request"},"constructor":{"name":"ProtocolError.MalformedRequest"}},{"binders":[],"body":{"kind":"string","value":"1\terror\tunsupported-version"},"constructor":{"name":"ProtocolError.UnsupportedVersion"}},{"binders":[],"body":{"kind":"string","value":"1\terror\tunknown-operation"},"constructor":{"name":"ProtocolError.UnknownOperation"}}],"kind":"match","scrutinee":{"kind":"var","name":"error"}},"kind":"definition","name":"encodeProtocolError","parameters":[{"name":"error","type":{"arguments":[],"kind":"named","member":{"name":"ProtocolError"}}}],"result":{"kind":"string"}},{"axioms":["Classical.choice","Quot.sound","propext"],"body":{"branches":[{"binders":["error"],"body":{"branches":[{"binders":[],"body":{"kind":"string","value":"1\terror\tdivision-by-zero"},"constructor":{"name":"CalculatorError.DivisionByZero"}},{"binders":[],"body":{"kind":"string","value":"1\terror\toverflow"},"constructor":{"name":"CalculatorError.Overflow"}}],"kind":"match","scrutinee":{"kind":"var","name":"error"}},"constructor":{"name":"Result.error"}},{"binders":["result"],"body":{"arguments":[{"head":{"kind":"string","value":"1\tok\t"},"kind":"cons","tail":{"head":{"arguments":[{"kind":"var","name":"result"}],"kind":"primitive","operation":"format_decimal","result":{"kind":"string"}},"kind":"cons","tail":{"element":{"kind":"string"},"kind":"nil"}}},{"kind":"string","value":""}],"kind":"primitive","operation":"join","result":{"kind":"string"}},"constructor":{"name":"Result.ok"}}],"kind":"match","scrutinee":{"kind":"var","name":"value"}},"kind":"definition","name":"encodeCalculationResult","parameters":[{"name":"value","type":{"error":{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}},"kind":"result","ok":{"kind":"int64"}}}],"result":{"kind":"string"}},{"axioms":["Classical.choice","Quot.sound","propext"],"body":{"branches":[{"binders":["error"],"body":{"arguments":[{"kind":"var","name":"error"}],"function":{"name":"encodeProtocolError"},"kind":"call"},"constructor":{"name":"Result.error"}},{"binders":["request"],"body":{"arguments":[{"arguments":[{"field":"operation","kind":"project","value":{"kind":"var","name":"request"}},{"field":"left","kind":"project","value":{"kind":"var","name":"request"}},{"field":"right","kind":"project","value":{"kind":"var","name":"request"}}],"function":{"name":"calculate"},"kind":"call"}],"function":{"name":"encodeCalculationResult"},"kind":"call"},"constructor":{"name":"Result.ok"}}],"kind":"match","scrutinee":{"arguments":[{"kind":"var","name":"value"}],"function":{"name":"decodeRequest"},"kind":"call"}},"kind":"definition","name":"dispatchString","parameters":[{"name":"value","type":{"kind":"string"}}],"result":{"kind":"string"}},{"axioms":["Classical.choice","Quot.sound","propext"],"body":{"branches":[{"binders":[],"body":{"arguments":[{"kind":"string","value":"1\terror\tmalformed-request"}],"kind":"primitive","operation":"utf8_encode","result":{"kind":"bytes"}},"constructor":{"name":"Option.none"}},{"binders":["text"],"body":{"arguments":[{"arguments":[{"kind":"var","name":"text"}],"function":{"name":"dispatchString"},"kind":"call"}],"kind":"primitive","operation":"utf8_encode","result":{"kind":"bytes"}},"constructor":{"name":"Option.some"}}],"kind":"match","scrutinee":{"arguments":[{"kind":"var","name":"value"}],"kind":"primitive","operation":"utf8_decode","result":{"kind":"option","value":{"kind":"string"}}}},"kind":"definition","name":"dispatchBytes","parameters":[{"name":"value","type":{"kind":"bytes"}}],"result":{"kind":"bytes"}},{"body":{"fields":[{"field":"name","value":{"kind":"string","value":"Calculator"}},{"field":"cargoName","value":{"kind":"string","value":"prism-calculator"}},{"field":"cargoVersion","value":{"kind":"string","value":"0.1.0"}},{"field":"cargoDescription","value":{"kind":"string","value":"A Lean-verified, Prism-generated checked i64 calculator."}},{"field":"cargoRepository","value":{"kind":"string","value":"https://github.com/UOR-Foundation/PrismPM"}},{"field":"cargoHomepage","value":{"kind":"string","value":"https://uor-foundation.github.io/calculator-example/"}},{"field":"libraryRoots","value":{"head":{"kind":"string","value":"PrismCalculator.Calculator.calculate"},"kind":"cons","tail":{"head":{"kind":"string","value":"PrismCalculator.Calculator.dispatchBytes"},"kind":"cons","tail":{"element":{"kind":"string"},"kind":"nil"}}}},{"field":"operationType","value":{"kind":"string","value":"Operation"}},{"field":"errorType","value":{"kind":"string","value":"CalculatorError"}},{"field":"functionName","value":{"kind":"string","value":"calculate"}},{"field":"acceptanceVectors","value":{"head":{"fields":[{"field":"request","value":{"hex":"310961646409300930","kind":"bytes"}},{"field":"response","value":{"hex":"31096f6b0930","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"3109616464093230093232","kind":"bytes"}},{"field":"response","value":{"hex":"31096f6b093432","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"310961646409393232333337323033363835343737353830370930","kind":"bytes"}},{"field":"response","value":{"hex":"31096f6b0939323233333732303336383534373735383037","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"310961646409393232333337323033363835343737353830370931","kind":"bytes"}},{"field":"response","value":{"hex":"31096572726f72096f766572666c6f77","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"3109616464092d39323233333732303336383534373735383038092d31","kind":"bytes"}},{"field":"response","value":{"hex":"31096572726f72096f766572666c6f77","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"31097375627472616374092d370935","kind":"bytes"}},{"field":"response","value":{"hex":"31096f6b092d3132","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"31097375627472616374092d393232333337323033363835343737353830380931","kind":"bytes"}},{"field":"response","value":{"hex":"31096572726f72096f766572666c6f77","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"310973756274726163740939323233333732303336383534373735383037092d31","kind":"bytes"}},{"field":"response","value":{"hex":"31096572726f72096f766572666c6f77","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"31096d756c7469706c79092d360937","kind":"bytes"}},{"field":"response","value":{"hex":"31096f6b092d3432","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"31096d756c7469706c7909393232333337323033363835343737353830370932","kind":"bytes"}},{"field":"response","value":{"hex":"31096572726f72096f766572666c6f77","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"31096d756c7469706c79092d39323233333732303336383534373735383038092d31","kind":"bytes"}},{"field":"response","value":{"hex":"31096572726f72096f766572666c6f77","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"3109646976696465092d370933","kind":"bytes"}},{"field":"response","value":{"hex":"31096f6b092d32","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"31096469766964650937092d33","kind":"bytes"}},{"field":"response","value":{"hex":"31096f6b092d32","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"310964697669646509310930","kind":"bytes"}},{"field":"response","value":{"hex":"31096572726f72096469766973696f6e2d62792d7a65726f","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"3109646976696465092d39323233333732303336383534373735383038092d31","kind":"bytes"}},{"field":"response","value":{"hex":"31096572726f72096f766572666c6f77","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"","kind":"bytes"}},{"field":"response","value":{"hex":"31096572726f72096d616c666f726d65642d72657175657374","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"320961646409310932","kind":"bytes"}},{"field":"response","value":{"hex":"31096572726f7209756e737570706f727465642d76657273696f6e","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"31096d6f6409310932","kind":"bytes"}},{"field":"response","value":{"hex":"31096572726f7209756e6b6e6f776e2d6f7065726174696f6e","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"31096164640930310932","kind":"bytes"}},{"field":"response","value":{"hex":"31096572726f72096d616c666f726d65642d72657175657374","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"3109616464092b310932","kind":"bytes"}},{"field":"response","value":{"hex":"31096572726f72096d616c666f726d65642d72657175657374","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"31096164640931","kind":"bytes"}},{"field":"response","value":{"hex":"31096572726f72096d616c666f726d65642d72657175657374","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"head":{"fields":[{"field":"request","value":{"hex":"ff","kind":"bytes"}},{"field":"response","value":{"hex":"31096572726f72096d616c666f726d65642d72657175657374","kind":"bytes"}}],"kind":"record","type":{"name":"AcceptanceVector"}},"kind":"cons","tail":{"element":{"arguments":[],"kind":"named","member":{"name":"AcceptanceVector"}},"kind":"nil"}}}}}}}}}}}}}}}}}}}}}}}},{"field":"entryRoot","value":{"kind":"string","value":"PrismCalculator.Calculator.dispatchBytes"}},{"field":"coreContract","value":{"kind":"string","value":"hologram:guest/core-wasm@1"}},{"field":"requestMaximum","value":{"kind":"integer","representation":"uint32","value":"52"}},{"field":"responseMaximum","value":{"kind":"integer","representation":"uint32","value":"27"}},{"field":"guestAllocationMaximum","value":{"kind":"integer","representation":"uint32","value":"65536"}},{"field":"capabilitiesEmpty","value":{"kind":"bool","value":true}},{"field":"fatArchive","value":{"kind":"bool","value":true}},{"field":"primaryLayer","value":{"kind":"integer","representation":"uint8","value":"0"}},{"field":"viewLayer","value":{"kind":"integer","representation":"uint8","value":"1"}},{"field":"view","value":{"arguments":[],"function":{"name":"calculatorView"},"kind":"call"}},{"field":"inputGrammar","value":{"arguments":[],"constructor":{"name":"InputGrammar.AsciiSignedI64"},"kind":"constructor"}},{"field":"liveMode","value":{"arguments":[],"constructor":{"name":"LiveMode.Polite"},"kind":"constructor"}},{"field":"layout","value":{"arguments":[],"constructor":{"name":"StyleToken.Compact"},"kind":"constructor"}},{"field":"color","value":{"arguments":[],"constructor":{"name":"StyleToken.HighContrast"},"kind":"constructor"}},{"field":"typography","value":{"arguments":[],"constructor":{"name":"StyleToken.SystemSans"},"kind":"constructor"}},{"field":"actions","value":{"head":{"arguments":[],"constructor":{"name":"ViewAction.Submit"},"kind":"constructor"},"kind":"cons","tail":{"head":{"arguments":[],"constructor":{"name":"ViewAction.Enter"},"kind":"constructor"},"kind":"cons","tail":{"element":{"arguments":[],"kind":"named","member":{"name":"ViewAction"}},"kind":"nil"}}}},{"field":"targets","value":{"head":{"arguments":[],"constructor":{"name":"PresentationTarget.HologramPortable"},"kind":"constructor"},"kind":"cons","tail":{"head":{"arguments":[],"constructor":{"name":"PresentationTarget.GithubPages"},"kind":"constructor"},"kind":"cons","tail":{"element":{"arguments":[],"kind":"named","member":{"name":"PresentationTarget"}},"kind":"nil"}}}}],"kind":"record","type":{"name":"CalculatorApplication"}},"kind":"definition","name":"calculatorApplication","parameters":[],"result":{"arguments":[],"kind":"named","member":{"name":"CalculatorApplication"}}},{"axioms":[],"body":{"branches":[{"binders":[],"body":{"arguments":[{"arguments":[],"constructor":{"name":"CalculatorError.Overflow"},"kind":"constructor"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"kind":"int64"},{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}}]},"constructor":{"name":"Option.none"}},{"binders":["result"],"body":{"arguments":[{"kind":"var","name":"result"}],"constructor":{"name":"Result.ok"},"kind":"constructor","type_arguments":[{"kind":"int64"},{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}}]},"constructor":{"name":"Option.some"}}],"kind":"match","scrutinee":{"kind":"var","name":"value"}},"kind":"definition","name":"checkedResult","parameters":[{"name":"value","type":{"kind":"option","value":{"kind":"int64"}}}],"result":{"error":{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}},"kind":"result","ok":{"kind":"int64"}}},{"axioms":[],"body":{"arguments":[{"arguments":[{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"kind":"primitive","operation":"checked_add","result":{"kind":"option","value":{"kind":"int64"}}}],"function":{"name":"checkedResult"},"kind":"call"},"kind":"definition","name":"addExpected","parameters":[{"name":"left","type":{"kind":"int64"}},{"name":"right","type":{"kind":"int64"}}],"result":{"error":{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}},"kind":"result","ok":{"kind":"int64"}}},{"axioms":[],"body":{"arguments":[{"arguments":[{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"kind":"primitive","operation":"checked_subtract","result":{"kind":"option","value":{"kind":"int64"}}}],"function":{"name":"checkedResult"},"kind":"call"},"kind":"definition","name":"subtractExpected","parameters":[{"name":"left","type":{"kind":"int64"}},{"name":"right","type":{"kind":"int64"}}],"result":{"error":{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}},"kind":"result","ok":{"kind":"int64"}}},{"axioms":[],"body":{"arguments":[{"arguments":[{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"kind":"primitive","operation":"checked_multiply","result":{"kind":"option","value":{"kind":"int64"}}}],"function":{"name":"checkedResult"},"kind":"call"},"kind":"definition","name":"multiplyExpected","parameters":[{"name":"left","type":{"kind":"int64"}},{"name":"right","type":{"kind":"int64"}}],"result":{"error":{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}},"kind":"result","ok":{"kind":"int64"}}},{"axioms":[],"body":{"condition":{"arguments":[{"kind":"var","name":"right"},{"kind":"integer","representation":"int64","value":"0"}],"kind":"primitive","operation":"equal","result":{"kind":"bool"}},"else_value":{"arguments":[{"arguments":[{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"kind":"primitive","operation":"checked_quotient","result":{"kind":"option","value":{"kind":"int64"}}}],"function":{"name":"checkedResult"},"kind":"call"},"kind":"if","then_value":{"arguments":[{"arguments":[],"constructor":{"name":"CalculatorError.DivisionByZero"},"kind":"constructor"}],"constructor":{"name":"Result.error"},"kind":"constructor","type_arguments":[{"kind":"int64"},{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}}]}},"kind":"definition","name":"divideExpected","parameters":[{"name":"left","type":{"kind":"int64"}},{"name":"right","type":{"kind":"int64"}}],"result":{"error":{"arguments":[],"kind":"named","member":{"name":"CalculatorError"}},"kind":"result","ok":{"kind":"int64"}}},{"axioms":[],"kind":"theorem","name":"addCorrect","parameters":[{"name":"left","type":{"kind":"int64"}},{"name":"right","type":{"kind":"int64"}}],"proof":{"kind":"reflexivity"},"statement":{"kind":"eq","left":{"arguments":[{"arguments":[],"constructor":{"name":"Operation.Add"},"kind":"constructor"},{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"function":{"name":"calculate"},"kind":"call"},"right":{"arguments":[{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"function":{"name":"addExpected"},"kind":"call"}}},{"axioms":[],"kind":"theorem","name":"subtractCorrect","parameters":[{"name":"left","type":{"kind":"int64"}},{"name":"right","type":{"kind":"int64"}}],"proof":{"kind":"reflexivity"},"statement":{"kind":"eq","left":{"arguments":[{"arguments":[],"constructor":{"name":"Operation.Subtract"},"kind":"constructor"},{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"function":{"name":"calculate"},"kind":"call"},"right":{"arguments":[{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"function":{"name":"subtractExpected"},"kind":"call"}}},{"axioms":[],"kind":"theorem","name":"multiplyCorrect","parameters":[{"name":"left","type":{"kind":"int64"}},{"name":"right","type":{"kind":"int64"}}],"proof":{"kind":"reflexivity"},"statement":{"kind":"eq","left":{"arguments":[{"arguments":[],"constructor":{"name":"Operation.Multiply"},"kind":"constructor"},{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"function":{"name":"calculate"},"kind":"call"},"right":{"arguments":[{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"function":{"name":"multiplyExpected"},"kind":"call"}}},{"axioms":[],"kind":"theorem","name":"divideCorrect","parameters":[{"name":"left","type":{"kind":"int64"}},{"name":"right","type":{"kind":"int64"}}],"proof":{"kind":"reflexivity"},"statement":{"kind":"eq","left":{"arguments":[{"arguments":[],"constructor":{"name":"Operation.Divide"},"kind":"constructor"},{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"function":{"name":"calculate"},"kind":"call"},"right":{"arguments":[{"kind":"var","name":"left"},{"kind":"var","name":"right"}],"function":{"name":"divideExpected"},"kind":"call"}}}],"spec":"lexlean/semantic-module/1"}}
+inductive{
+  name: Operation,
+  type_parameters: [],
+  parameters: [],
+  constructors: [
+    {name: Add, fields: []},
+    {name: Subtract, fields: []},
+    {name: Multiply, fields: []},
+    {name: Divide, fields: []}
+  ]
+}
+
+inductive{
+  name: CalculatorError,
+  type_parameters: [],
+  parameters: [],
+  constructors: [{name: DivisionByZero, fields: []}, {name: Overflow, fields: []}]
+}
+
+inductive{
+  name: ProtocolError,
+  type_parameters: [],
+  parameters: [],
+  constructors: [
+    {name: MalformedRequest, fields: []},
+    {name: UnsupportedVersion, fields: []},
+    {name: UnknownOperation, fields: []}
+  ]
+}
+
+structure{
+  name: ViewOperation,
+  type_parameters: [],
+  parameters: [],
+  fields: [
+    {name: label, type: String},
+    {name: requestName, type: String},
+    {name: rustVariant, type: String},
+    {name: discriminant, type: UInt8}
+  ]
+}
+
+structure{
+  name: CalculatorView,
+  type_parameters: [],
+  parameters: [],
+  fields: [
+    {name: title, type: String},
+    {name: heading, type: String},
+    {name: leftLabel, type: String},
+    {name: rightLabel, type: String},
+    {name: operationLabel, type: String},
+    {name: submitLabel, type: String},
+    {name: inputError, type: String},
+    {name: divisionError, type: String},
+    {name: overflowError, type: String},
+    {name: livePolite, type: Bool},
+    {name: retainFocus, type: Bool},
+    {name: submitOnEnter, type: Bool},
+    {name: hologramIntent, type: Bool},
+    {name: pagesAdapter, type: Bool},
+    {name: operations, type: (List ViewOperation)},
+    {name: initialOperation, type: UInt8}
+  ]
+}
+
+structure{
+  name: Request,
+  type_parameters: [],
+  parameters: [],
+  fields: [
+    {name: operation, type: Operation},
+    {name: left, type: Int64},
+    {name: right, type: Int64}
+  ]
+}
+
+inductive{
+  name: InputGrammar,
+  type_parameters: [],
+  parameters: [],
+  constructors: [{name: AsciiSignedI64, fields: []}]
+}
+
+inductive{
+  name: ViewAction,
+  type_parameters: [],
+  parameters: [],
+  constructors: [{name: Submit, fields: []}, {name: Enter, fields: []}]
+}
+
+inductive{
+  name: LiveMode,
+  type_parameters: [],
+  parameters: [],
+  constructors: [{name: Polite, fields: []}]
+}
+
+inductive{
+  name: StyleToken,
+  type_parameters: [],
+  parameters: [],
+  constructors: [
+    {name: Compact, fields: []},
+    {name: HighContrast, fields: []},
+    {name: SystemSans, fields: []}
+  ]
+}
+
+inductive{
+  name: PresentationTarget,
+  type_parameters: [],
+  parameters: [],
+  constructors: [{name: HologramPortable, fields: []}, {name: GithubPages, fields: []}]
+}
+
+structure{
+  name: AcceptanceVector,
+  type_parameters: [],
+  parameters: [],
+  fields: [{name: request, type: Bytes}, {name: response, type: Bytes}]
+}
+
+structure{
+  name: CalculatorApplication,
+  type_parameters: [],
+  parameters: [],
+  fields: [
+    {name: name, type: String},
+    {name: cargoName, type: String},
+    {name: cargoVersion, type: String},
+    {name: cargoDescription, type: String},
+    {name: cargoRepository, type: String},
+    {name: cargoHomepage, type: String},
+    {name: libraryRoots, type: (List String)},
+    {name: operationType, type: String},
+    {name: errorType, type: String},
+    {name: functionName, type: String},
+    {name: acceptanceVectors, type: (List AcceptanceVector)},
+    {name: entryRoot, type: String},
+    {name: coreContract, type: String},
+    {name: requestMaximum, type: UInt32},
+    {name: responseMaximum, type: UInt32},
+    {name: guestAllocationMaximum, type: UInt32},
+    {name: capabilitiesEmpty, type: Bool},
+    {name: fatArchive, type: Bool},
+    {name: primaryLayer, type: UInt8},
+    {name: viewLayer, type: UInt8},
+    {name: view, type: CalculatorView},
+    {name: inputGrammar, type: InputGrammar},
+    {name: liveMode, type: LiveMode},
+    {name: layout, type: StyleToken},
+    {name: color, type: StyleToken},
+    {name: typography, type: StyleToken},
+    {name: actions, type: (List ViewAction)},
+    {name: targets, type: (List PresentationTarget)}
+  ]
+}
+
+definition{
+  name: calculate,
+  parameters: [operation : Operation, left : Int64, right : Int64],
+  result: (Result Int64 CalculatorError),
+  body: (match operation
+    | Operation.Add => (match (prim checked_add left right : (Option Int64))
+      | Option.none => (ctor Result.error [Int64, CalculatorError] (ctor CalculatorError.Overflow))
+      | Option.some value => (ctor Result.ok [Int64, CalculatorError] value))
+    | Operation.Subtract => (match (prim checked_subtract left right : (Option Int64))
+      | Option.none => (ctor Result.error [Int64, CalculatorError] (ctor CalculatorError.Overflow))
+      | Option.some value => (ctor Result.ok [Int64, CalculatorError] value))
+    | Operation.Multiply => (match (prim checked_multiply left right : (Option Int64))
+      | Option.none => (ctor Result.error [Int64, CalculatorError] (ctor CalculatorError.Overflow))
+      | Option.some value => (ctor Result.ok [Int64, CalculatorError] value))
+    | Operation.Divide => (if (prim equal right (0 : Int64) : Bool) then (ctor Result.error [Int64, CalculatorError] (ctor CalculatorError.DivisionByZero)) else (match (prim checked_quotient left right : (Option Int64))
+      | Option.none => (ctor Result.error [Int64, CalculatorError] (ctor CalculatorError.Overflow))
+      | Option.some value => (ctor Result.ok [Int64, CalculatorError] value)))),
+  axioms: []
+}
+
+definition{
+  name: calculatorView,
+  parameters: [],
+  result: CalculatorView,
+  body: (record CalculatorView {title := "Calculator", heading := "Calculator", leftLabel := "Left operand", rightLabel := "Right operand", operationLabel := "Operation", submitLabel := "Calculate", inputError := "Enter a signed 64-bit integer.", divisionError := "Division by zero.", overflowError := "Arithmetic overflow.", livePolite := true, retainFocus := true, submitOnEnter := true, hologramIntent := true, pagesAdapter := true, operations := (cons (record ViewOperation {label := "Add", requestName := "add", rustVariant := "Add", discriminant := (0 : UInt8)}) (cons (record ViewOperation {label := "Subtract", requestName := "subtract", rustVariant := "Subtract", discriminant := (1 : UInt8)}) (cons (record ViewOperation {label := "Multiply", requestName := "multiply", rustVariant := "Multiply", discriminant := (2 : UInt8)}) (cons (record ViewOperation {label := "Divide", requestName := "divide", rustVariant := "Divide", discriminant := (3 : UInt8)}) (nil ViewOperation))))), initialOperation := (0 : UInt8)})
+}
+
+definition{
+  name: calculationCorrect,
+  parameters: [operation : Operation, left : Int64, right : Int64],
+  result: Prop,
+  body: ((calculate operation left right) = (calculate operation left right)),
+  axioms: []
+}
+
+theorem{
+  name: calculate_correct,
+  parameters: [operation : Operation, left : Int64, right : Int64],
+  statement: (calculationCorrect operation left right),
+  proof: reflexivity{},
+  axioms: []
+}
+
+definition{
+  name: parseOperation,
+  parameters: [value : String],
+  result: (Result Operation ProtocolError),
+  body: (if (prim equal value "add" : Bool) then (ctor Result.ok [Operation, ProtocolError] (ctor Operation.Add)) else (if (prim equal value "subtract" : Bool) then (ctor Result.ok [Operation, ProtocolError] (ctor Operation.Subtract)) else (if (prim equal value "multiply" : Bool) then (ctor Result.ok [Operation, ProtocolError] (ctor Operation.Multiply)) else (if (prim equal value "divide" : Bool) then (ctor Result.ok [Operation, ProtocolError] (ctor Operation.Divide)) else (ctor Result.error [Operation, ProtocolError] (ctor ProtocolError.UnknownOperation)))))),
+  axioms: []
+}
+
+definition{
+  name: decodeRight,
+  parameters: [operation : Operation, left : Int64, rightText : String],
+  result: (Result Request ProtocolError),
+  body: (match (prim parse_decimal rightText : (Option Int64))
+    | Option.none => (ctor Result.error [Request, ProtocolError] (ctor ProtocolError.MalformedRequest))
+    | Option.some right => (ctor Result.ok [Request, ProtocolError] (record Request {operation := operation, left := left, right := right}))),
+  axioms: [Classical.choice, Quot.sound, propext]
+}
+
+definition{
+  name: decodeLeft,
+  parameters: [operation : Operation, leftText : String, rightText : String],
+  result: (Result Request ProtocolError),
+  body: (match (prim parse_decimal leftText : (Option Int64))
+    | Option.none => (ctor Result.error [Request, ProtocolError] (ctor ProtocolError.MalformedRequest))
+    | Option.some left => (decodeRight operation left rightText)),
+  axioms: [Classical.choice, Quot.sound, propext]
+}
+
+definition{
+  name: decodeComplete,
+  parameters: [version : String, operationText : String, leftText : String, rightText : String],
+  result: (Result Request ProtocolError),
+  body: (if (prim equal version "1" : Bool) then (match (parseOperation operationText)
+    | Result.error error => (ctor Result.error [Request, ProtocolError] error)
+    | Result.ok operation => (decodeLeft operation leftText rightText)) else (ctor Result.error [Request, ProtocolError] (ctor ProtocolError.UnsupportedVersion))),
+  axioms: [Classical.choice, Quot.sound, propext]
+}
+
+definition{
+  name: decodeTail4,
+  parameters: [
+    version : String,
+    operationText : String,
+    leftText : String,
+    rightText : String,
+    values : (List String)
+  ],
+  result: (Result Request ProtocolError),
+  body: (match values
+    | List.nil => (decodeComplete version operationText leftText rightText)
+    | List.cons extra rest => (ctor Result.error [Request, ProtocolError] (ctor ProtocolError.MalformedRequest))),
+  axioms: [Classical.choice, Quot.sound, propext]
+}
+
+definition{
+  name: decodeTail3,
+  parameters: [version : String, operationText : String, leftText : String, values : (List String)],
+  result: (Result Request ProtocolError),
+  body: (match values
+    | List.nil => (ctor Result.error [Request, ProtocolError] (ctor ProtocolError.MalformedRequest))
+    | List.cons rightText rest => (decodeTail4 version operationText leftText rightText rest)),
+  axioms: [Classical.choice, Quot.sound, propext]
+}
+
+definition{
+  name: decodeTail2,
+  parameters: [version : String, operationText : String, values : (List String)],
+  result: (Result Request ProtocolError),
+  body: (match values
+    | List.nil => (ctor Result.error [Request, ProtocolError] (ctor ProtocolError.MalformedRequest))
+    | List.cons leftText rest => (decodeTail3 version operationText leftText rest)),
+  axioms: [Classical.choice, Quot.sound, propext]
+}
+
+definition{
+  name: decodeTail1,
+  parameters: [version : String, values : (List String)],
+  result: (Result Request ProtocolError),
+  body: (match values
+    | List.nil => (ctor Result.error [Request, ProtocolError] (ctor ProtocolError.MalformedRequest))
+    | List.cons operationText rest => (decodeTail2 version operationText rest)),
+  axioms: [Classical.choice, Quot.sound, propext]
+}
+
+definition{
+  name: decodeFields,
+  parameters: [values : (List String)],
+  result: (Result Request ProtocolError),
+  body: (match values
+    | List.nil => (ctor Result.error [Request, ProtocolError] (ctor ProtocolError.MalformedRequest))
+    | List.cons version rest => (decodeTail1 version rest)),
+  axioms: [Classical.choice, Quot.sound, propext]
+}
+
+definition{
+  name: decodeRequest,
+  parameters: [value : String],
+  result: (Result Request ProtocolError),
+  body: (match (prim split_exact value "\t" (4 : UInt32) : (Option (List String)))
+    | Option.none => (ctor Result.error [Request, ProtocolError] (ctor ProtocolError.MalformedRequest))
+    | Option.some fields => (decodeFields fields)),
+  axioms: [Classical.choice, Quot.sound, propext]
+}
+
+definition{
+  name: encodeProtocolError,
+  parameters: [error : ProtocolError],
+  result: String,
+  body: (match error
+    | ProtocolError.MalformedRequest => "1\terror\tmalformed-request"
+    | ProtocolError.UnsupportedVersion => "1\terror\tunsupported-version"
+    | ProtocolError.UnknownOperation => "1\terror\tunknown-operation"),
+  axioms: []
+}
+
+definition{
+  name: encodeCalculationResult,
+  parameters: [value : (Result Int64 CalculatorError)],
+  result: String,
+  body: (match value
+    | Result.error error => (match error
+      | CalculatorError.DivisionByZero => "1\terror\tdivision-by-zero"
+      | CalculatorError.Overflow => "1\terror\toverflow")
+    | Result.ok result => (prim join (cons "1\tok\t" (cons (prim format_decimal result : String) (nil String))) "" : String)),
+  axioms: [Classical.choice, Quot.sound, propext]
+}
+
+definition{
+  name: dispatchString,
+  parameters: [value : String],
+  result: String,
+  body: (match (decodeRequest value)
+    | Result.error error => (encodeProtocolError error)
+    | Result.ok request => (encodeCalculationResult (calculate (project request operation) (project request left) (project request right)))),
+  axioms: [Classical.choice, Quot.sound, propext]
+}
+
+definition{
+  name: dispatchBytes,
+  parameters: [value : Bytes],
+  result: Bytes,
+  body: (match (prim utf8_decode value : (Option String))
+    | Option.none => (prim utf8_encode "1\terror\tmalformed-request" : Bytes)
+    | Option.some text => (prim utf8_encode (dispatchString text) : Bytes)),
+  axioms: [Classical.choice, Quot.sound, propext]
+}
+
+definition{
+  name: calculatorApplication,
+  parameters: [],
+  result: CalculatorApplication,
+  body: (record CalculatorApplication {name := "Calculator", cargoName := "prism-calculator", cargoVersion := "0.1.0", cargoDescription := "A Lean-verified, Prism-generated checked i64 calculator.", cargoRepository := "https://github.com/UOR-Foundation/PrismPM", cargoHomepage := "https://uor-foundation.github.io/calculator-example/", libraryRoots := (cons "PrismCalculator.Calculator.calculate" (cons "PrismCalculator.Calculator.dispatchBytes" (nil String))), operationType := "Operation", errorType := "CalculatorError", functionName := "calculate", acceptanceVectors := (cons (record AcceptanceVector {request := 0x310961646409300930, response := 0x31096f6b0930}) (cons (record AcceptanceVector {request := 0x3109616464093230093232, response := 0x31096f6b093432}) (cons (record AcceptanceVector {request := 0x310961646409393232333337323033363835343737353830370930, response := 0x31096f6b0939323233333732303336383534373735383037}) (cons (record AcceptanceVector {request := 0x310961646409393232333337323033363835343737353830370931, response := 0x31096572726f72096f766572666c6f77}) (cons (record AcceptanceVector {request := 0x3109616464092d39323233333732303336383534373735383038092d31, response := 0x31096572726f72096f766572666c6f77}) (cons (record AcceptanceVector {request := 0x31097375627472616374092d370935, response := 0x31096f6b092d3132}) (cons (record AcceptanceVector {request := 0x31097375627472616374092d393232333337323033363835343737353830380931, response := 0x31096572726f72096f766572666c6f77}) (cons (record AcceptanceVector {request := 0x310973756274726163740939323233333732303336383534373735383037092d31, response := 0x31096572726f72096f766572666c6f77}) (cons (record AcceptanceVector {request := 0x31096d756c7469706c79092d360937, response := 0x31096f6b092d3432}) (cons (record AcceptanceVector {request := 0x31096d756c7469706c7909393232333337323033363835343737353830370932, response := 0x31096572726f72096f766572666c6f77}) (cons (record AcceptanceVector {request := 0x31096d756c7469706c79092d39323233333732303336383534373735383038092d31, response := 0x31096572726f72096f766572666c6f77}) (cons (record AcceptanceVector {request := 0x3109646976696465092d370933, response := 0x31096f6b092d32}) (cons (record AcceptanceVector {request := 0x31096469766964650937092d33, response := 0x31096f6b092d32}) (cons (record AcceptanceVector {request := 0x310964697669646509310930, response := 0x31096572726f72096469766973696f6e2d62792d7a65726f}) (cons (record AcceptanceVector {request := 0x3109646976696465092d39323233333732303336383534373735383038092d31, response := 0x31096572726f72096f766572666c6f77}) (cons (record AcceptanceVector {request := 0x, response := 0x31096572726f72096d616c666f726d65642d72657175657374}) (cons (record AcceptanceVector {request := 0x320961646409310932, response := 0x31096572726f7209756e737570706f727465642d76657273696f6e}) (cons (record AcceptanceVector {request := 0x31096d6f6409310932, response := 0x31096572726f7209756e6b6e6f776e2d6f7065726174696f6e}) (cons (record AcceptanceVector {request := 0x31096164640930310932, response := 0x31096572726f72096d616c666f726d65642d72657175657374}) (cons (record AcceptanceVector {request := 0x3109616464092b310932, response := 0x31096572726f72096d616c666f726d65642d72657175657374}) (cons (record AcceptanceVector {request := 0x31096164640931, response := 0x31096572726f72096d616c666f726d65642d72657175657374}) (cons (record AcceptanceVector {request := 0xff, response := 0x31096572726f72096d616c666f726d65642d72657175657374}) (nil AcceptanceVector))))))))))))))))))))))), entryRoot := "PrismCalculator.Calculator.dispatchBytes", coreContract := "hologram:guest/core-wasm@1", requestMaximum := (52 : UInt32), responseMaximum := (27 : UInt32), guestAllocationMaximum := (65536 : UInt32), capabilitiesEmpty := true, fatArchive := true, primaryLayer := (0 : UInt8), viewLayer := (1 : UInt8), view := (calculatorView), inputGrammar := (ctor InputGrammar.AsciiSignedI64), liveMode := (ctor LiveMode.Polite), layout := (ctor StyleToken.Compact), color := (ctor StyleToken.HighContrast), typography := (ctor StyleToken.SystemSans), actions := (cons (ctor ViewAction.Submit) (cons (ctor ViewAction.Enter) (nil ViewAction))), targets := (cons (ctor PresentationTarget.HologramPortable) (cons (ctor PresentationTarget.GithubPages) (nil PresentationTarget)))})
+}
+
+definition{
+  name: checkedResult,
+  parameters: [value : (Option Int64)],
+  result: (Result Int64 CalculatorError),
+  body: (match value
+    | Option.none => (ctor Result.error [Int64, CalculatorError] (ctor CalculatorError.Overflow))
+    | Option.some result => (ctor Result.ok [Int64, CalculatorError] result)),
+  axioms: []
+}
+
+definition{
+  name: addExpected,
+  parameters: [left : Int64, right : Int64],
+  result: (Result Int64 CalculatorError),
+  body: (checkedResult (prim checked_add left right : (Option Int64))),
+  axioms: []
+}
+
+definition{
+  name: subtractExpected,
+  parameters: [left : Int64, right : Int64],
+  result: (Result Int64 CalculatorError),
+  body: (checkedResult (prim checked_subtract left right : (Option Int64))),
+  axioms: []
+}
+
+definition{
+  name: multiplyExpected,
+  parameters: [left : Int64, right : Int64],
+  result: (Result Int64 CalculatorError),
+  body: (checkedResult (prim checked_multiply left right : (Option Int64))),
+  axioms: []
+}
+
+definition{
+  name: divideExpected,
+  parameters: [left : Int64, right : Int64],
+  result: (Result Int64 CalculatorError),
+  body: (if (prim equal right (0 : Int64) : Bool) then (ctor Result.error [Int64, CalculatorError] (ctor CalculatorError.DivisionByZero)) else (checkedResult (prim checked_quotient left right : (Option Int64)))),
+  axioms: []
+}
+
+theorem{
+  name: addCorrect,
+  parameters: [left : Int64, right : Int64],
+  statement: ((calculate (ctor Operation.Add) left right) = (addExpected left right)),
+  proof: reflexivity{},
+  axioms: []
+}
+
+theorem{
+  name: subtractCorrect,
+  parameters: [left : Int64, right : Int64],
+  statement: ((calculate (ctor Operation.Subtract) left right) = (subtractExpected left right)),
+  proof: reflexivity{},
+  axioms: []
+}
+
+theorem{
+  name: multiplyCorrect,
+  parameters: [left : Int64, right : Int64],
+  statement: ((calculate (ctor Operation.Multiply) left right) = (multiplyExpected left right)),
+  proof: reflexivity{},
+  axioms: []
+}
+
+theorem{
+  name: divideCorrect,
+  parameters: [left : Int64, right : Int64],
+  statement: ((calculate (ctor Operation.Divide) left right) = (divideExpected left right)),
+  proof: reflexivity{},
+  axioms: []
+}
 \end{semanticmodule}
 \end{lexlean}
