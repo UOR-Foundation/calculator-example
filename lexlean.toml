@@ -1,6 +1,6 @@
 spec = "lexlean/project/1"
 name = "prism-calculator"
-language = "1.1"
+language = "1.2"
 module_prefix = "PrismCalculator"
 source_roots = [".prism/sdk/inputs/stdlib", "src"]
 entrypoints = ["src/Calculator.lex.tex", "src/CalculatorSystem.lex.tex"]

@@ -1,7 +1,7 @@
-spec = "lexlean/lock/1"
-language = "1.1"
-compiler_semantics = "49561889f77c9c3571da51e8e53233da9df5ab8f46d16165159425ba2e82dc44"
-project_config_sha256 = "760b8ed320e5850e4adb7b9bb3ea19b70aa937eb636bb18df65be36383d9c1cb"
+spec = "lexlean/lock/2"
+language = "1.2"
+compiler_semantics = "fc363733b5a830173c9ace9c16fe1b13cab4faae79f426b95aa32e125fe814cc"
+project_config_sha256 = "1c077a529fa5fa7d714d62506e70c64209a8ef286e5838e3ef56bd1995a47cca"
 lean_toolchain = "leanprover/lean4:v4.32.1"
 
 [[workspace_file]]
@@ -18,33 +18,33 @@ sha256 = "8e3538e0ab5f81a3ee04927d8838c8c674e0e112838b4b3ce87ec218143276af"
 
 [[package]]
 id = "lexlean.core"
-version = "1.1.0"
+version = "1.2.0"
 kind = "builtin"
 source = "embedded"
 revision = "compiler-semantics"
-tree_sha256 = "c2a6e1ec065a2ce4e78db6bcb9ec3d511b5b4f4dc4c6db29f8c914da6d64d012"
-manifest_sha256 = "b40fae762f71fbe14c8f5012adde6ab3033bf17cdb6462ddfee26041e878d567"
+tree_sha256 = "827317cae68c162f3a96c8a8de4e53ab348e7d3724fd2b834fa85ecde1a1b392"
+manifest_sha256 = "271079763d269cc873531f515e56da960cd6321393b9460ff0e617666fa01d71"
 imports = []
 
 [[package]]
 id = "lexlean.std.bool"
-version = "1.1.0"
+version = "1.2.0"
 kind = "builtin"
 source = "embedded"
 revision = "compiler-semantics"
-tree_sha256 = "9f84dae675e88c2ecda76681e29d32133891f463313632334fbeeb68e0da68f9"
-manifest_sha256 = "6dacc8e2cadf580017d572d9a487c3815f3ca816108b183e5b55aace617aeb15"
-imports = ["lexlean.core@1.1.0"]
+tree_sha256 = "3bc0fb09d706ffa7d5a1363302ea87c049acc7c7dcafde63c62682620c11be9b"
+manifest_sha256 = "de58de2cf18a7a5a62d8c20649139d6dfe1f7b16b3130c75f150fbac5440a71e"
+imports = ["lexlean.core@1.2.0"]
 
 [[package]]
 id = "lexlean.std.nat"
-version = "1.1.0"
+version = "1.2.0"
 kind = "builtin"
 source = "embedded"
 revision = "compiler-semantics"
-tree_sha256 = "427e771881ebc347f3614e37b9cde96bd56800c7492c78e1a3621b9f2cf05df5"
-manifest_sha256 = "be2cb414091d5b8697f924de516cff5ccaa6cc9265ff1f3af8b15edb2b98bda7"
-imports = ["lexlean.core@1.1.0", "lexlean.std.bool@1.1.0"]
+tree_sha256 = "e0db021e01b91d651c43921d66f6b0023c8efbf17cac2ec53192ce5305e4e1ac"
+manifest_sha256 = "6fb446b39e3c1c18a5f10cfa1f7aa2bd431837719eb0eb7489aadf452c9420a7"
+imports = ["lexlean.core@1.2.0", "lexlean.std.bool@1.2.0"]
 
 [[package]]
 id = "prism.arch"
@@ -52,9 +52,9 @@ version = "1.0.0"
 kind = "path"
 source = ".prism/sdk/inputs/language/prism.arch"
 revision = "none"
-tree_sha256 = "e9061b2c8cadbd5ad8207a010e061970fdaffe620068a405582ed205fcdf13cd"
-manifest_sha256 = "8ab357ccbdc3437ad3b98e37ee62bc17df04efb08906d1d4b1c4d58877c20ce8"
-imports = ["lexlean.core@1.1.0", "lexlean.std.bool@1.1.0", "lexlean.std.nat@1.1.0"]
+tree_sha256 = "5d112f52e4c72ceb84f51b9ea1901d5749a3acab07d51a7c5ab39cf8ba79ea7c"
+manifest_sha256 = "14c95df8b512edacacdb1788b58ae90cf573b4e3f1dca0e41074bfde5a380c9f"
+imports = ["lexlean.core@1.2.0", "lexlean.std.bool@1.2.0", "lexlean.std.nat@1.2.0"]
 
 [[package]]
 id = "prism.qual"
@@ -62,9 +62,9 @@ version = "1.0.0"
 kind = "path"
 source = ".prism/sdk/inputs/language/prism.qual"
 revision = "none"
-tree_sha256 = "aed1134dd23611a61541a626208e70120f2e9dd62abfa62eb892d66a03a2ee37"
-manifest_sha256 = "7a62b7c0688c8d89e126b609079ef92a9512553a4012ffb8c826d0f1c78071f1"
-imports = ["lexlean.core@1.1.0", "lexlean.std.nat@1.1.0", "prism.arch@1.0.0"]
+tree_sha256 = "88748e3b24fa79693aed461bbce0fa626ec83356cd7ef980adaa22722a907602"
+manifest_sha256 = "a79fae9a81e748c01f19a48dd066b0dedd356c05b791bd8bc8e7ce20d44cb335"
+imports = ["lexlean.core@1.2.0", "lexlean.std.nat@1.2.0", "prism.arch@1.0.0"]
 
 [[package]]
 id = "prism.sec"
@@ -72,6 +72,6 @@ version = "1.0.0"
 kind = "path"
 source = ".prism/sdk/inputs/language/prism.sec"
 revision = "none"
-tree_sha256 = "9815267eba3d5df7fa0ef991c356f2e8bb8cfae424f0cbfca99a91dbc9259874"
-manifest_sha256 = "aa3941c467efb2844da3256cb9c7f76e8d3d2f5335f28f0d218b01cc64c6c1a1"
-imports = ["lexlean.core@1.1.0", "lexlean.std.bool@1.1.0", "lexlean.std.nat@1.1.0", "prism.arch@1.0.0"]
+tree_sha256 = "55bd2bc254d4170f6e76adc558955f1d1a31aa8a22ac88a3e3d6fe9307f76466"
+manifest_sha256 = "d9b9663715d38c6d181becc8d433e3c3636b55d7ef97bd1f3d39688222925f7c"
+imports = ["lexlean.core@1.2.0", "lexlean.std.bool@1.2.0", "lexlean.std.nat@1.2.0", "prism.arch@1.0.0"]
